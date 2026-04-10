@@ -1,0 +1,3543 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.asd-europe.org/s-series/s3000l/validValues" targetNamespace="http://www.asd-europe.org/s-series/s3000l/validValues" version = "003-00">
+<!-- ________________________________________________________________________________________________________________ -->
+<xsd:annotation>
+   <xsd:documentation>Specification: </xsd:documentation>
+   <xsd:documentation>Issue number: 3.0</xsd:documentation>
+   <xsd:documentation>Issue date: 2025-07-15</xsd:documentation>
+   <xsd:documentation>Data model file: S3000L_3-0_Data_model_001-00.EAP</xsd:documentation>
+   <xsd:documentation>XML schema release number: 003-00</xsd:documentation>
+   <xsd:documentation>XML schema release date: 2025-08-20</xsd:documentation>
+   <xsd:documentation>URL: http://www.s3000l.org</xsd:documentation>
+   <xsd:documentation>XSD generator version: DMEWG_GEN_2-0_002-56</xsd:documentation>
+      <xsd:documentation>Copyright:
+         Copyright (c) 2025 by AeroSpace, Security and Defence Industries Association of Europe (ASD).
+         
+         Limitations of Liability:
+         
+         1. This material is provided 'As Is' and neither ASD nor any person who has contributed to the creation, revision or maintenance of
+            the material makes any representations or warranties, express or implied, including but not limited to, warranties of
+            merchantability or fitness for any particular purpose.
+         2. Neither ASD nor any person who has contributed to the creation, revision or maintenance of this material shall be liable for any
+            direct, indirect, special or consequential damages or any other liability arising from any use of this material.
+         3. Revisions to this document may occur after its issuance. The user is responsible for determining if revisions to the material
+            contained in this document have occurred and are applicable.
+         
+      </xsd:documentation>
+   </xsd:annotation>
+
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="unit">
+      <!-- All groups of units, including unions such as timeCycleUnit, must be included in the unit union member type.
+      Use and restriction of the propertyType unit UML attribute requires this. -->
+      <xsd:union memberTypes="acceptanceParameterUnit angleUnit areaRateUnit areaUnit binaryRateUnit binaryUnit countRateUnit countUnit currencyUnit dataTransferRateUnit electricCurrentUnit electricTensionUnit eventRateUnit eventUnit flowUnit forceUnit lengthRateUnit lengthUnit luminousIntensityRateUnit luminousIntensityUnit massRateUnit massUnit powerUnit pressureRateUnit pressureUnit quantityUnit relativeUnit speedUnit temperatureUnit timeConsumptionRateUnit timeConsumptionUnit timeCycleRateUnit timeCycleUnit timeRateUnit timeUnit torqueUnit volumeRateUnit volumeUnit"/>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="acceptanceParameterUnit">
+      <xsd:union memberTypes="angleUnit electricCurrentUnit electricTensionUnit flowUnit forceUnit lengthUnit luminousIntensityUnit massUnit powerUnit pressureRateUnit pressureUnit temperatureUnit timeUnit torqueUnit volumeUnit"/>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="quantityUnit">
+      <xsd:union memberTypes="areaUnit countUnit lengthUnit massUnit relativeUnit volumeUnit"/>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="timeCycleRateUnit">
+      <xsd:union memberTypes="eventRateUnit lengthRateUnit timeRateUnit"/>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="timeCycleUnit">
+      <xsd:union memberTypes="eventUnit lengthUnit timeUnit"/>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="angleUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="DGR">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:degree</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="RAD">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:radian</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="areaRateUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="/CM2">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perSquareCentimeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/DC2">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perSquareDecimeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/FT2">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perSquareFoot</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/HF2">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perHundredSquareFeet</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/IN2">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perSquareInch</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/M2">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perSquareMeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/MM2">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perSquareMillimeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/YD2">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perSquareYard</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="areaUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="CM2">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:squareCentimeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="DC2">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:squareDecimeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="FT2">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:squareFoot</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="HF2">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:hundredSquareFeet</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="IN2">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:squareInch</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="M2">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:squareMeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MM2">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:squareMillimeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="YD2">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:squareYard</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="binaryRateUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="/B">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perByte</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/BIT">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perBit</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/GB">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perGigaByte</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/KB">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perKiloByte</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/MB">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perMegaByte</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/OCT">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perOctet</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/PB">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perPetaByte</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/TB">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perTeraByte</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="binaryUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="B">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:byte</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="BIT">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:bit</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="GB">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:gigaByte</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="KB">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:kiloByte</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MB">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:megaByte</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="OCT">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:octet</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="PB">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:petaByte</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="TB">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:teraByte</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="countRateUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="/AA">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perTwoHundredAndFifty</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/AST">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perAssortment</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/AX">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perTwenty</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/AY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perAssembly</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/DZ">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perDozen</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/EA">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perEach</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/FV">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perFive</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/GN">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perGrain</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/GP">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perGroup</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/GR">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perGross</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/HD">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perHundred</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/IU">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perUnit</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/LL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perFifty</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/LO">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perLot</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/ME">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perMeal</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/MX">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perThousand</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/OT">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perOutfit</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/PM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perPlate</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/PR">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perPair</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/QU">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perQuire</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/RA">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perRation</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/RM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perReam</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/SE">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perSet</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/SH">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perSheet</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/SK">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perSkein</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/TD">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perTwentyFour</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/TE">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perTen</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/TF">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perTwentyFive</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/TS">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perThirtySix</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/VC">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perFiveHundred</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/WI">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perWinding</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="countUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="AA">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:twoHundredAndFifty</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="AST">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:assortment</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="AX">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:twenty</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="AY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:assembly</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="DZ">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:dozen</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="EA">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:each</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="FV">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:five</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="GN">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:grain</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="GP">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:group</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="GR">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:gross</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="HD">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:hundred</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="IU">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:unit</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="LL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:fifty</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="LO">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:lot</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="ME">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:meal</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MX">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:thousand</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="OT">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:outfit</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="PM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:plate</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="PR">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:pair</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="QU">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:quire</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="RA">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:ration</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="RM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:ream</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="SE">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:set</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="SH">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:sheet</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="SK">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:skein</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="TD">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:twentyFour</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="TE">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:ten</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="TF">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:twentyFive</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="TS">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:thirtySix</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="VC">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:fiveHundred</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="WI">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:winding</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="dataTransferRateUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="BIPS">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:bitsPerSecond</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="BPS">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:bytesPerSecond</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="GBIS">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:gigaBitesPerSecond</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="GBS">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:gigaBytesPerSecond</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="KBIS">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:kiloBitsPerSecond</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="KBS">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:kiloBytesPerSecond</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MBIS">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:megaBitsPerSecond</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MBS">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:megaBytesPerSecond</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="electricCurrentUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="AM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:ampere</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MA">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:milliAmpere</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="electricTensionUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="KV">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:kiloVolt</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MV">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:milliVolt</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="V">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:volt</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="eventRateUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="/ARR">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perArrestment</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/CY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perCycle</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/DLA">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perDeckLanding</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/DT">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perDeckTakeOff</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/EM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perEmergencyStop</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/ES">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perEngineStart</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/FC">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perFlightCycle</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/FH">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perFlightHour</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/FI">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perFigure</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/LA">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perLaunch</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/LD">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perLanding</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/OC">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perOverhaulCycle</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/OH">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perOperatingHour</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/OP">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perOperation</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/OV">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perOverhaul</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/RD">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perRound</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/S">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perStart</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/SD">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perShutDown</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/SN">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perStress</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/SO">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perSortie</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/ST">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perStop</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/TA">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perTurnAround</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/TKO">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perTakeOff</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/TV">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perThousandVehicles </source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/VL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perVerticalLanding</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/VT">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perVerticalTakeOff</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="eventUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="ARR">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:arrestment</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="CY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:cycle</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="DLA">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:deckLanding</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="DTO">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:deckTakeOff</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="EM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:emergencyStop</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="ES">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:engineStart</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="FC">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:flightCycle</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="FH">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:flightHour</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="FI">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:figure</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="LA">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:launch</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="LD">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:landing</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="OC">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:overhaulCycle</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="OH">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:operatingHour</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="OP">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:operation</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="OV">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:overhaul</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="RD">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:round</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="S">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:start</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="SD">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:shutDown</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="SN">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:stress</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="SO">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:sortie</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="ST">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:stop</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="TA">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:turnAround</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="TKO">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:takeOff</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="VL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:verticalLanding</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="VT">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:verticalTakeOff</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="flowUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="F3M">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:cubicFeetPerMinute</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="F3S">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:cubicFeetPerSecond</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="GPM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:gallonsPerMinute</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="GPS">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:gallonsPerSecond</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="M3M">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:cubicMetersPerMinute</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="M3S">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:cubicMetersPerSecond</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="forceUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="KN">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:kiloNewton</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:newton</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="lengthRateUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="/CM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perCentiMeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/DA">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perDecaMeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/DE">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perDeciMeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/FM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perFathom</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/FT">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perFoot</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/HF">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perHundredFeet</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/HM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perHectoMeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/HY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perHundredYard</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/IN">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perInch</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/KM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perKiloMeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/LM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perLinearMeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/MF">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perThousandFeet</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/MI">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perMile</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/MM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perMilliMeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/MR">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perMeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NMI">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perNauticalMile</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/SHO">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perShot</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/YD">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perYard</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="lengthUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="CM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:centiMeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="DA">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:decaMeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="DE">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:deciMeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="FM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:fathom</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="FT">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:foot</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="HF">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:hundredFeet</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="HM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:hectoMeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="HY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:hundredYard</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="IN">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:inch</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="KM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:kiloMeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="LM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:linearMeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="M">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:meter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MF">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:thousandFeet</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MI">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:mile</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:milliMeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="NMI">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nauticalMile</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="SHO">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:shot</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="YD">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:yard</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="luminousIntensityRateUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="/CD">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perCandela</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="luminousIntensityUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="CD">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:candela</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="massRateUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="/CG">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perCentiGram</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/DC">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perDecaGram</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/DG">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perDeciGram</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/DM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perDram</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/GM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perGram</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/HG">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perHectogram</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/HW">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perHundredWeight</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/KG">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perKiloGram</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/LB">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perPound</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/LT">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perLongTon</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/MG">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perMilliGram</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/OZ">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perOunce</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/QK">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perQuaterKilogram</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/QN">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perQuintal</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/TM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perMetricTon</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/TN">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perTon</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/TO">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perTroyOunce</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="massUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="CG">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:centiGram</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="DC">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:decaGram</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="DG">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:deciGram</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="DM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:dram</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="GM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:gram</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="HG">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:hectogram</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="HW">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:hundredWeight</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="KG">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:kiloGram</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="LB">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:pound</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="LT">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:longTon</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MG">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:milliGram</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="OZ">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:ounce</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="QK">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:quaterKilogram</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="QN">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:quintal</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="TM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:metricTon</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="TN">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:ton</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="TO">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:troyOunce</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="powerUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="HP">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:horsePower</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="W">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:watt</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="pressureRateUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="BAR/DAY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:barPerDay</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="BAR/HR">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:barPerHour</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="BAR/MIN">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:barPerMinute</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="BAR/SEC">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:barPerSecond</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MBAR/DAY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:millibarPerDay</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MBAR/HR">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:millibarPerHout</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MBAR/MIN">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:millibarPerMinute</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MBAR/SEC">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:millibarPerSecond</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="PA/DAY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:pascalPerDay</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="PA/HR">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:pascalPerHour</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="PA/MIN">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:pascalPerMinute</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="PA/SEC">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:pascalPerSecond</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="PSI/DAY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:psiPerDay</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="PSI/HR">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:psiPerHour</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="PSI/MIN">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:psiPerMinute</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="PSI/SEC">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:psiPerSecond</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="pressureUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="AT">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:technicalAtmosphere</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="ATM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:physicalAtmosphere</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="BAR">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:bar</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="HPA">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:hectoPascal</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="INHG">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:inchesOfMercury</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="KPA">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:kiloPascal</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MBAR">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX0001G:milliBar</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MMHG">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:mmOfMercury</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MPA">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:megaPascal</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="PA">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:pascal</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="PSI">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:poundsPerSquareInch</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="TPA">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:teraPascal</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="TR">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:torr</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="relativeUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="PCT">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:percent</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="PME">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perMille</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="speedUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="KMH">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:kiloMetersPerHour</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="KMS">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:kiloMetersPerSecond</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="KT">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:knot</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="M/S">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:metersPerSecond</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MPH">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:milesPerHour</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MPS">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:milesPerSecond</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="temperatureUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="C">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:celcius</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="F">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:fahrenheit</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="K">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:kelvin</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="timeConsumptionRateUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="/MD">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perManDay</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/MH">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perManHour</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/MMI">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perManMinute</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/MW">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perManWeek</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/MY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perManYear</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="timeConsumptionUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="MD">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:manDay</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MH">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:manHour</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MMI">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:manMinute</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MW">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:manWeek</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:manYear</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="timeRateUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="/DAY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perDay</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/HR">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perHour</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/MIN">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perMinute</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/MON">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perMonth</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/MS">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perMilliSecond</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/QR">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perQuarter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/SEC">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perSecond</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/WK">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perWeek</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/YR">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perYear</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="timeUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="DAY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:day</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="HR">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:hour</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MIN">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:minute</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MON">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:month</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MS">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:milliSecond</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="QR">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:quarter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="SEC">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:second</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="WK">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:week</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="YR">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:year</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="torqueUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="NM">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:newtonMeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="usageTimeRateUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="HR/DAY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:hoursPerDay</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="HR/MON">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:hoursPerMonth</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="HR/QR">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:hoursPerQuarter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="HR/WK">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:hoursPerWeek</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="HR/YR">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:hoursPerYear</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="volumeRateUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="/BF">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perBoardFoot</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/CL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perCentiLiter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/CM3">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perCubicCentimeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/DB">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perDecaLiter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/DC3">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perCubicDecimeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/DL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perDeciLiter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/FT3">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perCubicFoot</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/FZ">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perFluidOunce</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/GC">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perGill</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/GI">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perImperialGallon</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/GL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perUnitedStatesGallon</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/HL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perHectoLiter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/HM3">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perHundredCubicMeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/IP">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perImperialPint</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/LI">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perLiter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/M3">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perCubicMeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/MF3">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perThousandCubicFeet</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/ML">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perMilliLiter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/PT">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perUnitedStatesPint</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/QB">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perImperialQuart</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/QT">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perUnitedStatesQuart</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/TL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perThousandLiter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/YD3">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:perCubicYard</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: DMEWG -->
+   <xsd:simpleType name="volumeUnit">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="BF">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:boardFoot</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="CL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:centiLiter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="CM3">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:cubicCentimeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="DB">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:decaLiter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="DL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:deciLiter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="DM3">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:cubicDecimeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="FT3">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:cubicFoot</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="FZ">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:fluidOunce</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="GC">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:gill</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="GI">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:imperialGallon</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="GL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:unitedStatesGallon</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="HL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:hectoLiter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="HM3">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:hundredCubicMeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="IP">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:imperialPint</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="LI">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:liter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="M3">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:cubicMeter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="MC">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:thousandCubicFeet</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="ML">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:milliLiter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="PT">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:unitedStatesPint</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="QB">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:imperialQuart</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="QT">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:unitedStatesQuart</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="TL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:thousandLiter</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="YD3">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:cubicYard</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+</xsd:schema>

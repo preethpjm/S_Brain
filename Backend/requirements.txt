@@ -1,0 +1,11 @@
+pymupdf>=1.24.0
+pdfplumber>=0.10.0
+tqdm>=4.65.0
+
+# Optional (for later phases):
+sentence-transformers>=2.2.0   # RAG embeddings
+faiss-cpu>=1.7.4               # Vector store
+neo4j>=5.0.0                   # Graph DB
+lxml>=4.9.0                    # XSD validation
+fastapi>=0.100.0               # API layer
+uvicorn>=0.23.0

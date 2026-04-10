@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  S1000D Sample: Illustrated Parts List (IPL) Data Module
+  This is the correct document type for translating to S2000M provisioning data.
+  A procedural DM (cleaning steps etc.) has no S2000M equivalent.
+-->
+<dmodule>
+  <identAndStatusSection>
+    <dmAddress>
+      <dmIdent>
+        <dmCode modelIdentCode="SAMPLEBIKE"
+                systemDiffCode="AAA"
+                systemCode="10"
+                subSystemCode="1"
+                subSubCode="0"
+                assayCode="00"
+                modelicCode="00"
+                discode="00"
+                discodeVariant="A"
+                itemLocationCode="A"/>
+        <language languageIsoCode="en" countryIsoCode="GB"/>
+        <issueInfo issueNumber="001" inWork="00"/>
+      </dmIdent>
+      <dmAddressItems>
+        <dmTitle>
+          <techName>Bicycle Frame Assembly</techName>
+          <infoName>Illustrated Parts List</infoName>
+        </dmTitle>
+      </dmAddressItems>
+    </dmAddress>
+    <dmStatus issueType="new" issueDate="2024-01-15">
+      <security securityClassification="01"/>
+      <responsiblePartnerCompany enterpriseCode="BK001"/>
+      <originator enterpriseCode="BK001"/>
+      <applicability>
+        <wholeModel/>
+      </applicability>
+      <qualityAssurance>
+        <unverified/>
+      </qualityAssurance>
+    </dmStatus>
+  </identAndStatusSection>
+
+  <!-- IPL Content Section -->
+  <content>
+    <illustratedPartsCatalog>
+
+      <!-- Figure 1: Frame Assembly -->
+      <figure id="fig001">
+        <title>Frame Assembly — Main Components</title>
+        <graphic infoEntityIdent="ICN-SAMPLEBIKE-001"/>
+      </figure>
+
+      <!-- Parts List for Figure 1 -->
+      <partsList figureNumber="1">
+
+        <!-- Item 1: Frame -->
+        <catalogSeqNumber item="1" indenture="1">
+          <partSegment>
+            <itemIdentData>
+              <nomenclature>
+                <identName>FRAME, BICYCLE, ALUMINIUM</identName>
+              </nomenclature>
+              <partNumberValue>BK-FRM-001-AL</partNumberValue>
+              <natoStockNumber natoSupplyClass="15" natoCodificationBureau="US">
+                <fullNatoStockNumber>1510-01-234-5678</fullNatoStockNumber>
+              </natoStockNumber>
+            </itemIdentData>
+            <quantityPerAssembly quantityUnitOfMeasure="EA">1</quantityPerAssembly>
+            <unitPrice currency="USD">450.00</unitPrice>
+            <manufacturerCodeValue>BK001</manufacturerCodeValue>
+          </partSegment>
+        </catalogSeqNumber>
+
+        <!-- Item 2: Handlebar -->
+        <catalogSeqNumber item="2" indenture="1">
+          <partSegment>
+            <itemIdentData>
+              <nomenclature>
+                <identName>HANDLEBAR ASSEMBLY</identName>
+              </nomenclature>
+              <partNumberValue>BK-HB-002-ST</partNumberValue>
+              <natoStockNumber natoSupplyClass="15" natoCodificationBureau="US">
+                <fullNatoStockNumber>1510-01-345-6789</fullNatoStockNumber>
+              </natoStockNumber>
+            </itemIdentData>
+            <quantityPerAssembly quantityUnitOfMeasure="EA">1</quantityPerAssembly>
+            <unitPrice currency="USD">85.00</unitPrice>
+            <manufacturerCodeValue>HB999</manufacturerCodeValue>
+          </partSegment>
+        </catalogSeqNumber>
+
+        <!-- Item 3: Brake Cable (attaches to Item 2) -->
+        <catalogSeqNumber item="3" indenture="2">
+          <partSegment>
+            <itemIdentData>
+              <nomenclature>
+                <identName>CABLE, BRAKE, 1.5MM</identName>
+              </nomenclature>
+              <partNumberValue>BK-CAB-003-BR</partNumberValue>
+              <natoStockNumber natoSupplyClass="15" natoCodificationBureau="UK">
+                <fullNatoStockNumber>1510-99-456-7890</fullNatoStockNumber>
+              </natoStockNumber>
+            </itemIdentData>
+            <quantityPerAssembly quantityUnitOfMeasure="EA">2</quantityPerAssembly>
+            <unitPrice currency="USD">12.50</unitPrice>
+            <manufacturerCodeValue>CBL555</manufacturerCodeValue>
+          </partSegment>
+        </catalogSeqNumber>
+
+        <!-- Item 4: Chain -->
+        <catalogSeqNumber item="4" indenture="1">
+          <partSegment>
+            <itemIdentData>
+              <nomenclature>
+                <identName>CHAIN, DRIVE, 11-SPEED</identName>
+              </nomenclature>
+              <partNumberValue>BK-CHN-004-11S</partNumberValue>
+              <natoStockNumber natoSupplyClass="15" natoCodificationBureau="US">
+                <fullNatoStockNumber>1510-01-567-8901</fullNatoStockNumber>
+              </natoStockNumber>
+            </itemIdentData>
+            <quantityPerAssembly quantityUnitOfMeasure="EA">1</quantityPerAssembly>
+            <unitPrice currency="USD">65.00</unitPrice>
+            <manufacturerCodeValue>CHN222</manufacturerCodeValue>
+            <!-- Criticality flag -->
+            <criticalityCode>SC</criticalityCode>
+          </partSegment>
+        </catalogSeqNumber>
+
+        <!-- Item 5: Bolt kit (bulk item) -->
+        <catalogSeqNumber item="5" indenture="1">
+          <partSegment>
+            <itemIdentData>
+              <nomenclature>
+                <identName>BOLT KIT, M5 STAINLESS</identName>
+              </nomenclature>
+              <partNumberValue>BK-BLT-005-M5</partNumberValue>
+            </itemIdentData>
+            <quantityPerAssembly quantityUnitOfMeasure="KT">1</quantityPerAssembly>
+            <unitPrice currency="USD">8.00</unitPrice>
+            <manufacturerCodeValue>BLT777</manufacturerCodeValue>
+            <sourceOfSupply>LOCAL</sourceOfSupply>
+          </partSegment>
+        </catalogSeqNumber>
+
+      </partsList>
+    </illustratedPartsCatalog>
+  </content>
+</dmodule>

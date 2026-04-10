@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.asd-europe.org/s-series/s2000m/validValues" targetNamespace="http://www.asd-europe.org/s-series/s2000m/validValues" version = "002-00">
+<!-- ________________________________________________________________________________________________________________ -->
+<xsd:annotation>
+   <xsd:documentation>Specification: S2000M</xsd:documentation>
+   <xsd:documentation>Issue number: 8.0</xsd:documentation>
+   <xsd:documentation>Issue date: 2025-07-30</xsd:documentation>
+   <xsd:documentation>Data model file: S2000M_8-0_Data_model_XSD.EAP</xsd:documentation>
+   <xsd:documentation>XML schema release number: 002-00</xsd:documentation>
+   <xsd:documentation>XML schema release date: 2025-12-10</xsd:documentation>
+   <xsd:documentation>URL: http://www.s2000m.org</xsd:documentation>
+   <xsd:documentation>XSD generator version: DMEWG_GEN_2-0_002-56</xsd:documentation>
+      <xsd:documentation>Copyright:
+         Copyright (c) 2025 by AeroSpace, Security and Defence Industries Association of Europe (ASD).
+         
+         Limitations of Liability:
+         
+         1. This material is provided 'As Is' and neither ASD nor any person who has contributed to the creation, revision or maintenance of
+            the material makes any representations or warranties, express or implied, including but not limited to, warranties of
+            merchantability or fitness for any particular purpose.
+         2. Neither ASD nor any person who has contributed to the creation, revision or maintenance of this material shall be liable for any
+            direct, indirect, special or consequential damages or any other liability arising from any use of this material.
+         3. Revisions to this document may occur after its issuance. The user is responsible for determining if revisions to the material
+            contained in this document have occurred and are applicable.
+         
+      </xsd:documentation>
+   </xsd:annotation>
+
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- Library Source: ISO 9362 -->
+   <xsd:simpleType name="bankCode">
+      <xsd:restriction base="xsd:string">
+         <xsd:pattern value="[A-Z0-9]{11}"/>
+         <!-- The format for the definition of the individual codes is as follows:
+         <xsd:enumeration value= "(BIC CODE)">
+            <xsd:annotation>
+               <xsd:appinfo>ISO9362:(Institution Name)</xsd:appinfo>
+               </xsd:annotation>
+            </xsd:enumeration>
+            where "(BIC CODE)" represents the BIC of the "(Institution Name)"
+         -->
+         <!-- EXAMPLE:
+         <xsd:enumeration value= "AACSDE33XXX">
+            <xsd:annotation>
+               <xsd:appinfo>ISO9362:Sparkasse Aachen</xsd:appinfo>
+               </xsd:annotation>
+            </xsd:enumeration>
+         -->
+         <!-- Due to the size of  ISO 9362, the different BIC codes need to be defined "as required" on a project-by-project basis -->
+         <!-- These will still be interoperable with the codes of other projects, as long as only ISO 9362 codes are used -->
+         <xsd:enumeration value="">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source></source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <!-- Special codes -->
+         <xsd:enumeration value="/EMPTY">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:nonSharedValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="/NULL">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:currentlyUnknownValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+         <xsd:enumeration value="N/A">
+            <xsd:annotation>
+               <xsd:appinfo>
+                  <source>SX001G:notApplicableValue</source>
+               </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:enumeration>
+      </xsd:restriction>
+   </xsd:simpleType>
+<!-- ________________________________________________________________________________________________________________ -->
+</xsd:schema>
