@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.asd-europe.org/s-series/sx000i" targetNamespace="http://www.asd-europe.org/s-series/sx000i" version = "004-00">
+<!-- ________________________________________________________________________________________________________________ -->
+<xsd:annotation>
+   <xsd:documentation>Specification: </xsd:documentation>
+   <xsd:documentation>Issue number: 4.0</xsd:documentation>
+   <xsd:documentation>Issue date: 2024-09-10</xsd:documentation>
+   <xsd:documentation>Data model file: SX000i_4-0_Data_model_002-00.eap</xsd:documentation>
+   <xsd:documentation>XML schema release number: 004-00</xsd:documentation>
+   <xsd:documentation>XML schema release date: 2025-12-10</xsd:documentation>
+   <xsd:documentation>URL: http://www.sx000i.org</xsd:documentation>
+   <xsd:documentation>XSD generator version: DMEWG_GEN_2-0_002-56</xsd:documentation>
+      <xsd:documentation>Copyright:
+         Copyright (c) 2016-2025 by AeroSpace, Security and Defence Industries Association of Europe (ASD).
+         
+         Limitations of Liability:
+         
+         1. This material is provided 'As Is' and neither ASD nor any person who has contributed to the creation, revision or maintenance of
+            the material makes any representations or warranties, express or implied, including but not limited to, warranties of
+            merchantability or fitness for any particular purpose.
+         2. Neither ASD nor any person who has contributed to the creation, revision or maintenance of this material shall be liable for any
+            direct, indirect, special or consequential damages or any other liability arising from any use of this material.
+         3. Revisions to this document may occur after its issuance. The user is responsible for determining if revisions to the material
+            contained in this document have occurred and are applicable.
+         
+      </xsd:documentation>
+   </xsd:annotation>
+
+<!-- ________________________________________________________________________________________________________________ -->
+   <!-- The project-specific use case needs to have the following format: -->
+   <!--
+   <xsd:complexType name="@projectSpecificUseCase">
+      <xsd:annotation>
+         <xsd:appinfo>
+            <source>@source:@projectSpecificUseCase</source>
+         </xsd:appinfo>
+      </xsd:annotation>
+      <xsd:sequence>
+         <xsd:element name="@classTag" type="@className" minOccurs="0" maxOccurs="unbounded"/>
+         <xsd:group ref="@classNonAbstractClasses" minOccurs="0" maxOccurs="unbounded"/>
+      </xsd:sequence>
+   </xsd:complexType>
+-->
+<!--
+WHERE:
+	- '@projectSpecificUseCase' refers to the name of the project-specific Use Case
+- '@source' refers to a a project or company-specific code or identifier.
+- '@classTag' refers to the tag of the class used in the main XML schema
+- '@className' refers to one of the classes defined in the main XML schema.
+- '@classNonAbstractClasses' refers to a class with class name 'class' and all its specializations.
+
+NOTE: You can add as many different classes or groups as you wish in the format indicated above.
+
+NOTE:
+This project-specific exchange defintion must be referenced in the project_specific_exchanges XSD file.
+-->
+</xsd:schema>

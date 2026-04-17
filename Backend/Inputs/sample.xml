@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  S1000D Sample: Illustrated Parts List (IPL) Data Module
-  This is the correct document type for translating to S2000M provisioning data.
-  A procedural DM (cleaning steps etc.) has no S2000M equivalent.
--->
 <dmodule>
   <identAndStatusSection>
     <dmAddress>
