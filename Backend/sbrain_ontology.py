@@ -1,92 +1,287 @@
 """
-sbrain_ontology.py — Enhanced Ontology Layer (Context-Aware Semantic Resolution)
-Minimal, bidirectional, structure + pure semantic
+sbrain_ontology.py — Agentic Ontology Layer v5.3
+Fixes:
+  - Extracts ANY repeating element group, not just catalogSeqNumber
+  - Smarter tag sanitisation (camelCase-aware, not first-word split)
+  - Handles S1000D → S2000M and S2000M → S1000D symmetrically
 """
 
 import xml.etree.ElementTree as ET
 import re
 from typing import List, Dict
+from datetime import datetime
+from dataclasses import dataclass, field
+
+
+@dataclass
+class ConceptNode:
+    original_tag: str
+    value: str
+    target_tag: str
+    confidence: float
+    context: str
+    attributes: Dict[str, str] = field(default_factory=dict)
+
+
+# Wraps a long PascalCase XMI class name into a short usable tag.
+# e.g. "HardwarePartDefinitionCommerceData" → "commerceData"
+def _sanitise_tag(raw: str) -> str:
+    # 1. Check explicit clean map first
+    CLEAN_MAP = {
+        "PartInProvisioningProject":               "partNumber",
+        "HardwarePartDefinitionCommerceData":       "unitPrice",
+        "HardwarePartDefinitionCustomerFurnishedData": "manufacturerCode",
+        "natoItemName":                             "itemNomenclature",
+    }
+    if raw in CLEAN_MAP:
+        return CLEAN_MAP[raw]
+
+    # 2. If it's already short and sane, keep it
+    if len(raw) <= 25 and re.match(r'^[a-zA-Z][a-zA-Z0-9]*$', raw):
+        # lowercase first letter for XML element convention
+        return raw[0].lower() + raw[1:]
+
+    # 3. Long PascalCase: take last two camelCase words as a short name
+    # "HardwarePartDefinitionCommerceData" → ["Hardware","Part","Definition","Commerce","Data"]
+    words = re.sub(r'([A-Z])', r' \1', raw).split()
+    if len(words) >= 2:
+        tail = words[-2] + words[-1]
+        return tail[0].lower() + tail[1:]
+
+    # 4. Fallback: lowercase whole thing, strip spaces
+    return re.sub(r'\s+', '', raw).lower()
+
+
+# S1000D item container tags (in priority order)
+_S1000D_ITEM_CONTAINERS = [
+    "catalogSeqNumber",
+    "itemSeqNumber",
+    "sparePartsEntry",
+    "supplyItem",
+    "partEntry",
+]
+
+# S2000M item container tags
+_S2000M_ITEM_CONTAINERS = [
+    "provisioningItem",
+    "sparePartRecord",
+    "supplyRecord",
+    "itemRecord",
+    "part",
+]
+
+
+def _find_item_groups(root, from_std: str) -> List[ET.Element]:
+    """
+    Find all repeating item-level elements regardless of nesting.
+    Tries known container tags first; falls back to the most frequently
+    repeated child tag of the document root.
+    """
+    containers = _S1000D_ITEM_CONTAINERS if from_std == "S1000D" else _S2000M_ITEM_CONTAINERS
+
+    for container in containers:
+        found = root.findall(f".//{container}")
+        if found:
+            return found
+
+    # Generic fallback: find the most common repeated child tag anywhere
+    tag_counts: Dict[str, int] = {}
+    for elem in root.iter():
+        t = re.sub(r'\{.*\}', '', elem.tag)
+        tag_counts[t] = tag_counts.get(t, 0) + 1
+
+    if not tag_counts:
+        return []
+
+    # Filter out the root tag itself and very short tags (likely wrappers)
+    root_tag = re.sub(r'\{.*\}', '', root.tag)
+    candidates = {
+        t: c for t, c in tag_counts.items()
+        if t != root_tag and c > 1 and len(t) > 3
+    }
+    if not candidates:
+        return [root]   # last resort: treat whole doc as one item
+
+    best_tag = max(candidates, key=lambda t: candidates[t])
+    return root.findall(f".//{best_tag}")
+
 
 class SBrainOntology:
     def __init__(self, matcher):
         self.matcher = matcher
 
-    def understand_and_translate(self, xml_root, from_std: str, to_std: str) -> ET.Element:
-        item_groups = self._extract_structured_items(xml_root, from_std)
-        
+    def understand_and_translate(
+        self, xml_root, from_std: str, to_std: str
+    ) -> ET.Element:
+        item_elements = _find_item_groups(xml_root, from_std)
+
+        if not item_elements:
+            # Nothing recognisable — wrap the whole root as one item
+            item_elements = [xml_root]
+
+        print(f"  Ontology: found {len(item_elements)} item groups "
+              f"(tag={re.sub(r'{.*}','',item_elements[0].tag) if item_elements else '?'})")
+
+        hierarchy_tracker: Dict[int, str] = {}
         understood_items = []
-        for group in item_groups:
-            understood = self._understand_item(group, from_std, to_std)
-            understood_items.append(understood)
-        
+
+        for elem in item_elements:
+            group = self._flatten_element(elem, from_std)
+            item_data = self._understand_item(group, from_std, to_std)
+
+            # Track parent–child hierarchy via indenture level
+            current_pn = next(
+                (c.value for c in item_data
+                 if "partnumber" in c.target_tag.lower() or
+                    "itemnumber" in c.target_tag.lower()),
+                None
+            )
+            try:
+                current_indenture = int(
+                    next((c.value for c in item_data
+                          if c.original_tag in ("indenture", "indentureLevel")), 1)
+                )
+            except (ValueError, TypeError):
+                current_indenture = 1
+
+            if current_pn:
+                hierarchy_tracker[current_indenture] = current_pn
+
+            if current_indenture > 1:
+                parent_pn = hierarchy_tracker.get(current_indenture - 1)
+                if parent_pn:
+                    item_data.append(ConceptNode(
+                        original_tag="nha_link",
+                        value=parent_pn,
+                        target_tag="nextHigherAssembly",
+                        confidence=1.0,
+                        context="synthetic_hierarchy",
+                    ))
+
+            understood_items.append(item_data)
+
         return self._generate_target(understood_items, to_std)
 
-    def _extract_structured_items(self, root, from_std: str) -> List[list]:
-        items = []
-        for csn in root.findall(".//catalogSeqNumber"):
-            group = []
-            self._walk(csn, group, from_std, parent_path=[])
-            if group:
-                items.append(group)
-        if not items:
-            group = []
-            self._walk(root, group, from_std, parent_path=[])
-            items.append(group)
-        return items
+    # ------------------------------------------------------------------
+    # Extraction
+    # ------------------------------------------------------------------
 
-    def _walk(self, elem, group: list, from_std: str, parent_path: list):
-        tag = self._strip_ns(elem.tag)
-        value = (elem.text or "").strip()
-        current_path = parent_path + [tag]
+    def _flatten_element(self, elem: ET.Element, from_std: str) -> List[dict]:
+        """
+        Walk an item element and collect all leaf text nodes as a flat list.
+        Captures indenture from attributes when present.
+        """
+        group = []
 
-        if value:
+        # Pull indenture from attributes (S1000D uses indenture="2" on the element)
+        indenture = elem.get("indenture") or elem.get("indentureLevel")
+        if indenture:
             group.append({
-                "tag": tag,
-                "value": value,
-                "attributes": dict(elem.attrib),
-                "standard": from_std,
-                "parent_context": " > ".join(current_path[-3:])  # rich context
+                "tag": "indenture",
+                "value": indenture,
+                "parent_context": re.sub(r'\{.*\}', '', elem.tag),
+                "attr": {},
             })
 
-        for child in elem:
-            self._walk(child, group, from_std, current_path)
+        self._walk(elem, group, from_std,
+                   parent_path=[re.sub(r'\{.*\}', '', elem.tag)])
+        return group
 
-    def _strip_ns(self, tag: str) -> str:
-        return re.sub(r"\{.*?\}", "", tag)
+    def _walk(self, node: ET.Element, group: list,
+              from_std: str, parent_path: List[str]):
+        for child in node:
+            tag = re.sub(r'\{.*\}', '', child.tag)
+            new_path = parent_path + [tag]
 
-    def _understand_item(self, concepts: list, from_std: str, to_std: str) -> list:
-        """Enhanced semantic resolution with context"""
+            if child.text and child.text.strip():
+                group.append({
+                    "tag":            tag,
+                    "value":          child.text.strip(),
+                    "parent_context": " > ".join(parent_path[-2:]),
+                    "attr":           dict(child.attrib),
+                })
+
+            # Also emit non-text nodes that carry purely attribute data
+            elif child.attrib:
+                for attr_name, attr_val in child.attrib.items():
+                    if attr_val.strip():
+                        group.append({
+                            "tag":            f"{tag}.{attr_name}",
+                            "value":          attr_val.strip(),
+                            "parent_context": " > ".join(parent_path[-2:]),
+                            "attr":           {},
+                        })
+
+            self._walk(child, group, from_std, new_path)
+
+    # ------------------------------------------------------------------
+    # Semantic resolution
+    # ------------------------------------------------------------------
+
+    def _understand_item(
+        self, group: List[dict], from_std: str, to_std: str
+    ) -> List[ConceptNode]:
         understood = []
-        for c in concepts:
-            # Primary: direct matcher
-            best = self.matcher.find_best_concept_in_target(c["tag"], from_std, to_std)
-            
-            if best and best.score >= 0.38:
-                target_tag = best.target_tag
-            else:
-                # Context-aware fallback using richer signal
-                context_text = f"Tag: {c['tag']} Context: {c['parent_context']} Value example: {c['value'][:100]} aerospace parts catalog item"
-                best_fallback = self.matcher.find_best_concept_in_target(c["tag"], from_std, to_std)  # re-use with synth
-                target_tag = best_fallback.target_tag if best_fallback else c["tag"]
+        for c in group:
+            best = self.matcher.get_best_match(
+                c["tag"], from_std, to_std,
+                context=c["parent_context"]
+            )
+            target_tag = (
+                best.target_tag if (best and best.score >= 0.35)
+                else c["tag"]
+            )
+            conf = best.score if best else 0.0
 
-            understood.append({
-                "original_tag": c["tag"],
-                "value": c["value"],
-                "target_tag": target_tag,
-                "confidence": best.score if best else 0.0
-            })
+            understood.append(ConceptNode(
+                original_tag=c["tag"],
+                value=c["value"],
+                target_tag=target_tag,
+                confidence=conf,
+                context=c["parent_context"],
+                attributes=c["attr"],
+            ))
         return understood
 
-    def _generate_target(self, understood_items: List[list], to_std: str) -> ET.Element:
-        """Dynamic, minimal generation"""
-        root = ET.Element(f"{to_std.lower()}TranslatedDocument")
-        
-        for item in understood_items:
-            item_el = ET.SubElement(root, "Item")
-            for u in item:
-                if u["value"]:
-                    # Clean tag (camelCase → proper)
-                    clean_tag = re.sub(r'([a-z0-9])([A-Z])', r'\1_\2', u["target_tag"]).lower()
-                    ET.SubElement(item_el, clean_tag).text = str(u["value"])
-        
+    # ------------------------------------------------------------------
+    # XML generation
+    # ------------------------------------------------------------------
+
+    def _generate_target(
+        self, understood_items: List[List[ConceptNode]], to_std: str
+    ) -> ET.Element:
+        root = ET.Element(f"{to_std.lower()}Message")
+
+        meta = ET.SubElement(root, "messageHeader")
+        meta.set("engine",   "S-Brain-v5.3")
+        meta.set("dateTime", datetime.now().isoformat())
+        meta.set("standard", to_std)
+
+        item_list = ET.SubElement(root, "itemList")
+
+        for item_concepts in understood_items:
+            item_el = ET.SubElement(item_list, "item")
+
+            for node in item_concepts:
+                # indenture → attribute on <item>, not a child element
+                if node.original_tag in ("indenture", "indentureLevel"):
+                    item_el.set("indentureLevel", str(node.value))
+                    continue
+
+                # Sanitise the tag name
+                tag = _sanitise_tag(node.target_tag)
+
+                child = ET.SubElement(item_el, tag)
+                child.text = str(node.value)
+
+                # Audit attributes
+                child.set("conf", f"{node.confidence:.2f}")
+                child.set("src",  node.original_tag)
+
+                # Restore original attributes (currency, units, etc.)
+                for k, v in node.attributes.items():
+                    # Don't shadow the audit attrs
+                    if k not in ("conf", "src"):
+                        child.set(k, v)
+
         return root
