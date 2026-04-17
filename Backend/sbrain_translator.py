@@ -25,14 +25,17 @@ class OntologyDrivenTranslator:
         root = self._parse_xml_tolerant(xml_input)
 
         # Pure ontology pipeline
-        translated_root = self.ontology.understand_and_translate(root, from_std, to_std)
+        translated_root = self.ontology.understand_and_translate(...)
+
+        # Ensure proper structure
+        translated_root.tag = "s2000mMessage" if to_std == "S2000M" else translated_root.tag
+        wrapper = ET.Element(f"{to_std.lower()}TranslatedDocument")
 
         # Metadata wrapper
-        wrapper = ET.Element(f"{to_std.lower()}TranslatedDocument")
+        wrapper.append(translated_root)
         wrapper.set("from", from_std)
         wrapper.set("to", to_std)
         wrapper.set("translatedAt", datetime.utcnow().isoformat() + "Z")
-        wrapper.append(translated_root)
 
         ET.indent(wrapper, space="  ")
         xml_str = ET.tostring(wrapper, encoding="unicode", xml_declaration=True)
@@ -73,7 +76,7 @@ class OntologyDrivenTranslator:
         """Count how many tags were meaningfully mapped"""
         count = 0
         for elem in translated_root.iter():
-            if elem.text and elem.text.strip() and elem.tag != "Item":
+            if elem.text and elem.text.strip() and elem.tag.lower() != "item":
                 count += 1
         return count
 
