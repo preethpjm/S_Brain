@@ -22,35 +22,85 @@ class ConceptNode:
     context: str
     attributes: Dict[str, str] = field(default_factory=dict)
 
+CANONICAL_MAP = {
+    "identName": "itemNomenclature",
+    "nomenclature": "itemNomenclature",
+    "partNumberValue": "partNumber",
+    "partNumber": "partNumber",
+    "fullNatoStockNumber": "nsn",
+    "natoStockNumber": "nsn",
+    "quantityPerAssembly": "quantityPerNextHigherAssembly",
+    "quantity": "quantityPerNextHigherAssembly",
+    "criticalityCode": "criticalityIndicator",
+    "sourceOfSupply": "sourceOfSupplyCode",
+    "unitPrice": "unitPrice",
+    "manufacturerCodeValue": "manufacturerCode",
+}
 
 # Wraps a long PascalCase XMI class name into a short usable tag.
 # e.g. "HardwarePartDefinitionCommerceData" → "commerceData"
 def _sanitise_tag(raw: str) -> str:
-    # 1. Check explicit clean map first
+    raw_clean = raw.strip()
+
+    # --------------------------------------------------
+    # 1. STRICT / CANONICAL MAP (highest priority)
+    # --------------------------------------------------
     CLEAN_MAP = {
-        "PartInProvisioningProject":               "partNumber",
-        "HardwarePartDefinitionCommerceData":       "unitPrice",
+        "PartInProvisioningProject": "partNumber",
+        "HardwarePartDefinitionCommerceData": "unitPrice",
         "HardwarePartDefinitionCustomerFurnishedData": "manufacturerCode",
-        "natoItemName":                             "itemNomenclature",
+        "natoItemName": "itemNomenclature",
+        "identName": "itemNomenclature",
+        "partNumberValue": "partNumber",
+        "fullNatoStockNumber": "nsn",
+        "quantityPerAssembly": "quantityPerNextHigherAssembly",
+        "criticalityCode": "criticalityIndicator",
+        "sourceOfSupply": "sourceOfSupplyCode",
     }
-    if raw in CLEAN_MAP:
-        return CLEAN_MAP[raw]
 
-    # 2. If it's already short and sane, keep it
-    if len(raw) <= 25 and re.match(r'^[a-zA-Z][a-zA-Z0-9]*$', raw):
-        # lowercase first letter for XML element convention
-        return raw[0].lower() + raw[1:]
+    if raw_clean in CLEAN_MAP:
+        return CLEAN_MAP[raw_clean]
 
-    # 3. Long PascalCase: take last two camelCase words as a short name
-    # "HardwarePartDefinitionCommerceData" → ["Hardware","Part","Definition","Commerce","Data"]
-    words = re.sub(r'([A-Z])', r' \1', raw).split()
+    raw_lower = raw_clean.lower()
+
+    # --------------------------------------------------
+    # 2. KEYWORD-BASED SEMANTIC MAP (secondary)
+    # --------------------------------------------------
+    KEYWORD_MAP = {
+        "nato": "nsn",
+        "stock": "nsn",
+        "price": "unitPrice",
+        "cost": "unitPrice",
+        "quantity": "quantityPerNextHigherAssembly",
+        "ident": "itemNomenclature",
+        "name": "itemNomenclature",
+        "manufacturer": "manufacturerCode",
+        "supply": "sourceOfSupplyCode",
+        "critical": "criticalityIndicator",
+    }
+
+    for k, v in KEYWORD_MAP.items():
+        if k in raw_lower:
+            return v
+
+    # --------------------------------------------------
+    # 3. CLEAN SHORT TAGS (safe passthrough)
+    # --------------------------------------------------
+    if len(raw_clean) <= 25 and re.match(r'^[a-zA-Z][a-zA-Z0-9]*$', raw_clean):
+        return raw_clean[0].lower() + raw_clean[1:]
+
+    # --------------------------------------------------
+    # 4. CAMELCASE REDUCTION (last resort)
+    # --------------------------------------------------
+    words = re.sub(r'([A-Z])', r' \1', raw_clean).split()
     if len(words) >= 2:
         tail = words[-2] + words[-1]
         return tail[0].lower() + tail[1:]
 
-    # 4. Fallback: lowercase whole thing, strip spaces
-    return re.sub(r'\s+', '', raw).lower()
-
+    # --------------------------------------------------
+    # 5. FINAL FALLBACK
+    # --------------------------------------------------
+    return re.sub(r'\s+', '', raw_lower)
 
 # S1000D item container tags (in priority order)
 _S1000D_ITEM_CONTAINERS = [
@@ -121,6 +171,10 @@ class SBrainOntology:
 
         print(f"  Ontology: found {len(item_elements)} item groups "
               f"(tag={re.sub(r'{.*}','',item_elements[0].tag) if item_elements else '?'})")
+        
+        for lvl in list(hierarchy_tracker.keys()):
+            if lvl > current_indenture:
+                del hierarchy_tracker[lvl]
 
         hierarchy_tracker: Dict[int, str] = {}
         understood_items = []
@@ -222,16 +276,23 @@ class SBrainOntology:
         self, group: List[dict], from_std: str, to_std: str
     ) -> List[ConceptNode]:
         understood = []
+
         for c in group:
             best = self.matcher.get_best_match(
                 c["tag"], from_std, to_std,
                 context=c["parent_context"]
             )
-            target_tag = (
-                best.target_tag if (best and best.score >= 0.35)
-                else c["tag"]
-            )
-            conf = best.score if best else 0.0
+
+            # STEP 1: Canonical override (VERY IMPORTANT)
+            if c["tag"] in CANONICAL_MAP:
+                target_tag = CANONICAL_MAP[c["tag"]]
+                conf = 0.90
+            elif best and best.score >= 0.35:
+                target_tag = best.target_tag
+                conf = max(0.5, best.score)
+            else:
+                target_tag = c["tag"]
+                conf = 0.30
 
             understood.append(ConceptNode(
                 original_tag=c["tag"],
@@ -241,8 +302,8 @@ class SBrainOntology:
                 context=c["parent_context"],
                 attributes=c["attr"],
             ))
-        return understood
 
+        return understood
     # ------------------------------------------------------------------
     # XML generation
     # ------------------------------------------------------------------
@@ -261,26 +322,32 @@ class SBrainOntology:
 
         for item_concepts in understood_items:
             item_el = ET.SubElement(item_list, "item")
+            seen_tags = set()
 
             for node in item_concepts:
-                # indenture → attribute on <item>, not a child element
+
                 if node.original_tag in ("indenture", "indentureLevel"):
                     item_el.set("indentureLevel", str(node.value))
                     continue
 
-                # Sanitise the tag name
                 tag = _sanitise_tag(node.target_tag)
+
+                # 🚨 Prevent duplicates
+                if tag in seen_tags:
+                    continue
+                seen_tags.add(tag)
+
+                # 🚨 Prevent semantic corruption
+                if tag == "partNumber" and node.original_tag != "partNumberValue":
+                    continue
 
                 child = ET.SubElement(item_el, tag)
                 child.text = str(node.value)
 
-                # Audit attributes
                 child.set("conf", f"{node.confidence:.2f}")
-                child.set("src",  node.original_tag)
+                child.set("src", node.original_tag)
 
-                # Restore original attributes (currency, units, etc.)
                 for k, v in node.attributes.items():
-                    # Don't shadow the audit attrs
                     if k not in ("conf", "src"):
                         child.set(k, v)
 
