@@ -19,6 +19,7 @@ from typing import Optional, List, Dict
 from sentence_transformers import SentenceTransformer
 import faiss
 import os
+import numpy as np
 
 XS_NS = "http://www.w3.org/2001/XMLSchema"
 
@@ -565,7 +566,7 @@ class SemanticCrossMatcher:
         if candidates:
             return max(candidates, key=lambda x: x.score)
 
-        # Fallback: Pure semantic search
+        # True fallback with rich context
         synth_def = self.harvester._synthetic_definition(source_tag)
         neighbours = self.index.search_by_text(synth_def, top_k=8, exclude_standard=from_std)
         
@@ -575,10 +576,10 @@ class SemanticCrossMatcher:
         for rec, cos_score in neighbours:
             if rec.standard != to_std:
                 continue
-            name_bonus = self._name_similarity(source_tag, rec.tag_name) * 0.25
+            name_bonus = _name_similarity(source_tag, rec.tag_name) * 0.25   # module-level function
             final_score = cos_score + name_bonus
 
-            if final_score > best_score:
+            if final_score > best_score and final_score >= 0.32:   # MIN_RETURN_SCORE floor
                 best_score = final_score
                 best_link = ConceptLink(
                     source_tag=source_tag,
@@ -590,8 +591,8 @@ class SemanticCrossMatcher:
                     evidence=f"cos={cos_score:.3f} + name={name_bonus:.3f}"
                 )
 
-        return best_link if best_link and best_link.score >= 0.32 else None
-
+        return best_link
+    
     def _name_similarity(self, a: str, b: str) -> float:
         """Simple token overlap similarity for fallback"""
         ta = set(re.sub(r'([A-Z])', r' \1', a).lower().split())
@@ -617,32 +618,91 @@ class SemanticCrossMatcher:
 
     # ── Query API ──
 
-    def get_best_match(self, tag: str, from_std: str, to_std: str) -> Optional[ConceptLink]:
-        """
-        Case-insensitive lookup with camelCase normalisation.
-        Falls back to live semantic search if not in precomputed links.
-        """
-        key = (_norm_key(tag), from_std, to_std)
-        bucket = self._link_index.get(key, [])
-        if bucket:
-            return bucket[0]
+    def get_best_match(self, tag: str, from_std: str, to_std: str, context: str = ""):
+        norm = _norm_key(tag)
 
-        # Live fallback: embed the tag name's synthetic definition and search
-        synth = self.harvester._synthetic_definition(tag, "", [])
-        neighbours = self.index.search_by_text(synth, top_k=10, exclude_standard=from_std)
-        for rec, cos_score in neighbours:
-            if rec.standard != to_std:
+        # 1. Fast path — precomputed link index
+        key = (norm, from_std, to_std)
+        if key in self._link_index:
+            return self._link_index[key][0]
+
+        # 2. Domain enforcement
+        DOMAIN_MAP = {
+            "quantity": ["quantity", "qpa", "count", "amount"],
+            "identity": ["partnumber", "pnr", "ident", "nomenclature"],
+            "logistics": ["nsn", "stock", "natocode", "supply", "cage"],
+            "pricing":   ["price", "cost", "currency", "unitprice"],
+        }
+        source_domain = None
+        for domain, keys in DOMAIN_MAP.items():
+            if any(k in norm for k in keys):
+                source_domain = domain
+                break
+
+        # 3. Manual alias overrides
+        AERO_ALIASES = {
+            "manufacturerCodeValue": "ncageCode",
+            "identName":             "itemNomenclature",
+            "quantityPerAssembly":   "qpa",
+        }
+        if tag in AERO_ALIASES and to_std == "S2000M":
+            for rec in self.index.records:          # FIXED: self.index.records
+                if rec.tag_name == AERO_ALIASES[tag] and rec.standard == "S2000M":
+                    return ConceptLink(
+                        source_tag=tag,
+                        source_std=from_std,        # FIXED: correct field name
+                        target_tag=rec.tag_name,
+                        target_std=to_std,          # FIXED: correct field name
+                        score=1.0,
+                        match_type="alias_match",
+                        evidence="AERO_ALIAS_BOOST",
+                    )
+
+        # 4. Live vector search
+        rich_query = f"{tag} {context}" if context else tag
+        query_vec = self.index.model.encode(        # FIXED: self.index.model
+            [rich_query]
+        ).astype(np.float32)
+        faiss.normalize_L2(query_vec)
+
+        D, I = self.index.index.search(query_vec, 20)  # FIXED: self.index.index
+
+        candidates = []
+        for score, idx in zip(D[0], I[0]):
+            if idx < 0 or idx >= len(self.index.records):  # FIXED: self.index.records
                 continue
-            name_bonus = _name_similarity(tag, rec.tag_name) * 0.12
-            final = min(cos_score + name_bonus, 1.0)
-            if final >= 0.40:
-                match_type = "live_semantic"
-                return ConceptLink(
-                    source_tag=tag, source_std=from_std,
-                    target_tag=rec.tag_name, target_std=to_std,
-                    score=round(final, 4), match_type=match_type,
-                    evidence=f"live cos={cos_score:.3f} name={name_bonus:.3f}"
-                )
+            res = self.index.records[idx]                   # FIXED: self.index.records
+            if res.standard != to_std:
+                continue
+
+            final_score = float(score)
+            target_norm = _norm_key(res.tag_name)
+
+            # Domain penalty
+            if source_domain:
+                domain_keys = DOMAIN_MAP[source_domain]
+                target_def  = res.definition_text.lower()
+                if not any(k in target_norm or k in target_def for k in domain_keys):
+                    final_score -= 0.35
+
+            # Name overlap bonus
+            if norm in target_norm or target_norm in norm:
+                final_score += 0.20
+
+            candidates.append(ConceptLink(
+                source_tag=tag,
+                source_std=from_std,        # FIXED: correct field name
+                target_tag=res.tag_name,
+                target_std=to_std,          # FIXED: correct field name
+                score=min(round(final_score, 4), 1.0),
+                match_type="semantic_filtered",
+                evidence=f"domain={source_domain} cos={score:.3f}",
+            ))
+
+        if candidates:
+            candidates.sort(key=lambda x: x.score, reverse=True)
+            return candidates[0]
+
         return None
 
     def get_all_matches(self, tag: str, from_std: str, to_std: str,
