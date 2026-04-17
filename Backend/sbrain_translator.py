@@ -47,7 +47,12 @@ class OntologyDrivenTranslator:
         coverage = sum(1 for elem in translated_root.iter() 
                       if elem.text and elem.text.strip() and elem.tag != "Item")
         print(f"  Ontology Coverage: {coverage} meaningful concepts translated")
-
+        # Optional debug mapping table
+        if hasattr(self, '_debug') and self._debug:
+            print("\n=== DEBUG MAPPING TABLE ===")
+            for elem in translated_root.iter():
+                if elem.text and elem.text.strip():
+                    print(f"{elem.tag} ← original data (confidence preserved from matcher)")
         return {"xml_string": xml_str, "log": self.translation_log}
 
     def _parse_xml_tolerant(self, path: str):
@@ -75,19 +80,22 @@ class OntologyDrivenTranslator:
 # CLI
 def main():
     import argparse
-    parser = argparse.ArgumentParser(description="S-Brain Translator v5.0 — Full Ontology")
-    parser.add_argument("--input", required=True)
-    parser.add_argument("--from", dest="from_std", required=True)
-    parser.add_argument("--to", dest="to_std", required=True)
+    parser = argparse.ArgumentParser(description="S-Brain Translator v5.0")
+    parser.add_argument("--input",  required=True)
+    parser.add_argument("--from",   dest="from_std", required=True)
+    parser.add_argument("--to",     dest="to_std",   required=True)
     parser.add_argument("--output", help="Output file path")
+    parser.add_argument("--debug",  action="store_true")
     args = parser.parse_args()
 
     translator = OntologyDrivenTranslator()
+    translator._debug = args.debug      # FIXED: set BEFORE calling translate()
+
     translator.translate(
         xml_input=args.input,
         from_std=args.from_std.upper(),
         to_std=args.to_std.upper(),
-        output_path=args.output
+        output_path=args.output,
     )
 
 if __name__ == "__main__":
