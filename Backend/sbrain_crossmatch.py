@@ -625,7 +625,23 @@ class SemanticCrossMatcher:
         key = (norm, from_std, to_std)
         if key in self._link_index:
             return self._link_index[key][0]
+        # HARD RULES (prevents garbage matches)
+        STRICT_MAP = {
+            "quantityPerAssembly": "quantityPerNextHigherAssembly",
+            "identName": "itemNomenclature",
+            "partNumberValue": "partNumber",
+        }
 
+        if tag in STRICT_MAP and to_std == "S2000M":
+            return ConceptLink(
+                source_tag=tag,
+                source_std=from_std,
+                target_tag=STRICT_MAP[tag],
+                target_std=to_std,
+                score=1.0,
+                match_type="rule_override",
+                evidence="STRICT_RULE",
+            )
         # 2. Domain enforcement
         DOMAIN_MAP = {
             "quantity": ["quantity", "qpa", "count", "amount"],
