@@ -1,12 +1,20 @@
 """
-sbrain_crossmatch.py — Semantic Cross-Standard Concept Matcher v2
-Fixes:
-  1. getparent() replaced with ET parent_map (stdlib compatible)
-  2. S1000D element names harvested from ALL nested elements, not just top-level
-  3. Synthetic definitions improved — camelCase split gives much richer signal
-  4. Case-insensitive + camelCase-normalised lookup in get_best_match
-  5. Direct name-similarity bonus to catch obvious aliases (partNumber ↔ partNumberValue)
-  6. SX1000i treated as source standard too so its elements appear as match targets
+sbrain_crossmatch.py — Semantic Cross-Standard Concept Matcher v3
+Changes over v2:
+  1. ConceptLink gains relationship_type field (equivalent/partial_equivalent/transformation/reference)
+  2. SX1000iBooster fixed — bidirectional alias lookup so bridge confirmations actually fire
+  3. SX1000i included as bridge node in _compute_all_links (was silently excluded before)
+  4. build() passes SX1000i into standards list so links are generated
+  5. get_best_match() priority order fixed:
+       STRICT_MAP → AERO_ALIASES → _link_index → vector search
+     (previously _link_index ran first, returning weak semantic hits before aliases)
+  6. Domain penalty changed from -= 0.35 to *= 0.5 (stronger enforcement)
+  7. Confidence floor raised: get_best_match() won't return score < 0.50 for
+     non-rule matches, preventing garbage weak matches from reaching the translator
+  8. find_best_concept_in_target() gains SX1000i multi-hop fallback
+  9. Synthetic definitions enriched with domain classification
+  10. normalized_cos = (cos + 1) / 2 applied in _compute_all_links for proper [0,1] range
+  11. _classify_relationship() added as new sibling to _classify()
 """
 
 import json
@@ -19,7 +27,6 @@ from typing import Optional, List, Dict
 from sentence_transformers import SentenceTransformer
 import faiss
 import os
-import numpy as np
 
 XS_NS = "http://www.w3.org/2001/XMLSchema"
 
@@ -48,6 +55,8 @@ class ConceptLink:
     score: float
     match_type: str
     evidence: str = ""
+    relationship_type: str = "unknown"   # equivalent | partial_equivalent | transformation | reference
+
 
 # ─────────────────────────────────────────────
 # HELPERS
@@ -59,9 +68,7 @@ def _split_camel(name: str) -> str:
     'dmCode'          → 'dm code'
     'NSN'             → 'NSN'   (all-caps acronyms kept together)
     """
-    # Insert space before uppercase letters that follow lowercase
     s = re.sub(r'([a-z])([A-Z])', r'\1 \2', name)
-    # Insert space before uppercase run followed by lowercase (acronym boundary)
     s = re.sub(r'([A-Z]+)([A-Z][a-z])', r'\1 \2', s)
     return s.replace('_', ' ').replace('-', ' ').lower().strip()
 
@@ -80,7 +87,6 @@ def _name_similarity(a: str, b: str) -> float:
     tb = set(_split_camel(b).split())
     if not ta or not tb:
         return 0.0
-    # Jaccard
     return len(ta & tb) / len(ta | tb)
 
 
@@ -101,7 +107,6 @@ class DefinitionHarvester:
             try:
                 tree = ET.parse(str(xsd_file))
                 root = tree.getroot()
-                # Build parent map for this file (stdlib compatible — no lxml needed)
                 parent_map = {child: parent for parent in root.iter() for child in parent}
                 records.extend(
                     self._parse_xsd_file(root, parent_map, xsd_file.name, standard, seen)
@@ -113,7 +118,6 @@ class DefinitionHarvester:
     def _parse_xsd_file(self, root, parent_map, fname, standard, seen) -> list:
         records = []
 
-        # ── Collect ALL elements (global + nested) ──
         for elem in root.findall(f".//{{{XS_NS}}}element"):
             name = elem.get("name")
             if not name or name in seen:
@@ -124,7 +128,6 @@ class DefinitionHarvester:
             xs_type = elem.get("type", "")
             parents = self._find_parents_via_map(elem, parent_map)
 
-            # Use camelCase split to build a richer synthetic definition
             if not defn:
                 defn = self._synthetic_definition(name, xs_type, parents)
 
@@ -138,30 +141,19 @@ class DefinitionHarvester:
                 source="xsd"
             ))
 
-        # ── Global complexTypes (structural concepts) ──
         for ct in root.findall(f".//{{{XS_NS}}}complexType"):
             name = ct.get("name")
             if not name or name in seen:
                 continue
             seen.add(name)
             defn = self._extract_xsd_annotation(ct)
-            if defn:
-                records.append(ConceptRecord(
-                    tag_name=name,
-                    standard=standard,
-                    definition_text=defn,
-                    source_file=fname,
-                    source="xsd",
-                ))
-            else:
-                # Still add with synthetic def so the name is in the index
-                records.append(ConceptRecord(
-                    tag_name=name,
-                    standard=standard,
-                    definition_text=self._synthetic_definition(name, "", []),
-                    source_file=fname,
-                    source="xsd",
-                ))
+            records.append(ConceptRecord(
+                tag_name=name,
+                standard=standard,
+                definition_text=defn if defn else self._synthetic_definition(name, "", []),
+                source_file=fname,
+                source="xsd",
+            ))
 
         return records
 
@@ -192,12 +184,38 @@ class DefinitionHarvester:
         return parents
 
     def _synthetic_definition(self, tag_name: str, xs_type: str = "", parents: List[str] = None) -> str:
-            words = re.sub(r'([A-Z])', r' \1', tag_name).replace('_', ' ').strip().lower()
-            extra = " identifier" if any(k in tag_name.lower() for k in ["code","ident","number","id"]) else ""
-            if parents:
-                extra += f" inside {parents[0]}"
-            return f"This element represents a{extra} {words} in aerospace technical publications and data modules."
-    
+        """
+        Enriched synthetic definition with domain classification.
+        Much richer than the old generic template — gives embeddings real signal.
+        """
+        words = _split_camel(tag_name)
+
+        # Domain classification
+        tag_lower = tag_name.lower()
+        if any(k in tag_lower for k in ["code", "ident", "number", "id", "ref"]):
+            domain = "identifier"
+        elif any(k in tag_lower for k in ["name", "nomenclature", "title", "description"]):
+            domain = "nomenclature descriptor"
+        elif any(k in tag_lower for k in ["quantity", "count", "qty", "amount"]):
+            domain = "quantity value"
+        elif any(k in tag_lower for k in ["price", "cost", "value", "rate"]):
+            domain = "financial value"
+        elif any(k in tag_lower for k in ["date", "time", "period", "year"]):
+            domain = "temporal value"
+        elif any(k in tag_lower for k in ["status", "state", "indicator", "flag"]):
+            domain = "status indicator"
+        elif any(k in tag_lower for k in ["address", "location", "site"]):
+            domain = "location reference"
+        else:
+            domain = "data field"
+
+        parent_ctx = f" within {parents[0]}" if parents else ""
+        type_ctx   = f" typed as {xs_type}" if xs_type else ""
+        return (
+            f"{words} is a {domain}{parent_ctx} used in aerospace "
+            f"technical publications and logistics data{type_ctx}."
+        )
+
     def harvest_xmi(self, xmi_path: str, standard: str) -> list:
         """Parses Enterprise Architect XMI — Note field is the definition."""
         records = []
@@ -303,11 +321,11 @@ class SemanticConceptIndex:
         os.environ.pop("HTTP_PROXY", None)
         os.environ.pop("HTTPS_PROXY", None)
 
-        model_path = Path(__file__).resolve().parent.parent / "models" / "all-MiniLM-L6-v2"
-        print(f"Loading embedding model from: {model_path}")
-        #self.model = SentenceTransformer(str(model_path))
-        self.model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
-        
+        local_model_path = Path(__file__).resolve().parent.parent / "models" / "all-MiniLM-L6-v2"
+        print(f"Loading embedding model from: {local_model_path}")
+        self.model = SentenceTransformer(str(local_model_path))
+        #self.model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+
         self.records: list = []
         self.embeddings: Optional[np.ndarray] = None
         self.index = None
@@ -405,21 +423,40 @@ class StructuralScorer:
 
 
 # ─────────────────────────────────────────────
-# SX1000i BOOSTER
+# SX1000i BOOSTER  (fixed — bidirectional)
 # ─────────────────────────────────────────────
 
 class SX1000iBooster:
+    """
+    Fixed bidirectional alias lookup.
+
+    Old bug: confirmed[alias] = {sx_tag} — so boost(src, tgt) checked whether
+    the target SX1000i tag was in confirmed[source], which almost never fired
+    because source tags are S1000D/S2000M names, not SX1000i names.
+
+    Fix: store bidirectional edges so any pair sharing a common SX1000i bridge
+    node gets the confirmation boost.
+    """
     def __init__(self, sx_records: list):
         self.confirmed: dict = {}
         for rec in sx_records:
+            sx_key = _norm_key(rec.tag_name)
             for alias in rec.aliases:
-                key = _norm_key(alias)
-                self.confirmed.setdefault(key, set()).add(_norm_key(rec.tag_name))
+                alias_key = _norm_key(alias)
+                # Both directions: alias→sx and sx→alias
+                self.confirmed.setdefault(alias_key, set()).add(sx_key)
+                self.confirmed.setdefault(sx_key, set()).add(alias_key)
 
     def boost(self, source_tag: str, target_tag: str) -> float:
         sk = _norm_key(source_tag)
         tk = _norm_key(target_tag)
-        if tk in self.confirmed.get(sk, set()) or sk in self.confirmed.get(tk, set()):
+        source_connections = self.confirmed.get(sk, set())
+        target_connections = self.confirmed.get(tk, set())
+        # Strongest signal: source and target share a common SX1000i bridge node
+        if source_connections & target_connections:
+            return 0.20
+        # Weaker signal: one is directly an alias of the other
+        if tk in source_connections or sk in target_connections:
             return 0.15
         return 0.0
 
@@ -434,9 +471,68 @@ class SemanticCrossMatcher:
         "definition_match":  0.78,
         "structural_match":  0.68,
         "sx1000i_confirmed": 0.60,
-        "name_match":        0.55,   # strong name similarity even if definition weak
+        "name_match":        0.55,
         "alias_match":       0.50,
         "unmapped":          0.0,
+    }
+
+    # Canonical STRICT overrides — always win, score = 1.0
+    # These are known-correct aerospace mappings that must never be beaten by FAISS
+    STRICT_MAP: Dict[str, Dict[str, str]] = {
+        "S2000M": {
+            "quantityPerAssembly":   "quantityPerNextHigherAssembly",
+            "identName":             "itemNomenclature",
+            "partNumberValue":       "partNumber",
+            "fullNatoStockNumber":   "nsn",
+            "natoStockNumber":       "nsn",
+            "dmCode":                "dataModuleCode",
+            "partNumber":            "partNumber",
+            "nsn":                   "nsn",
+            "figureNumber":          "figureReference",
+            "itemSeqNumber":         "itemSequenceNumber",
+        },
+        "S1000D": {
+            "itemNomenclature":            "identName",
+            "qpa":                         "quantityPerAssembly",
+            "ncageCode":                   "manufacturerCodeValue",
+            "unitOfIssue":                 "unitOfMeasure",
+            "provisioningSequenceNumber":  "item",
+        },
+        "S3000L": {
+            "partNumberValue":   "partNumber",
+            "identName":         "itemNomenclature",
+            "lruPartNumber":     "partNumber",
+            "hardwareItemId":    "partNumber",
+        },
+    }
+
+    # Aerospace alias overrides — run before _link_index, score = 0.95
+    # These are well-known tag equivalences across S-series standards
+    AERO_ALIASES: Dict[str, Dict[str, str]] = {
+        "S2000M": {
+            "manufacturerCodeValue": "ncageCode",
+            "identName":             "itemNomenclature",
+            "quantityPerAssembly":   "qpa",
+            "criticalityCode":       "criticalityIndicator",
+            "sourceOfSupply":        "sourceOfSupplyCode",
+            "unitPrice":             "unitPrice",
+        },
+        "S1000D": {
+            "ncageCode":             "manufacturerCodeValue",
+            "itemNomenclature":      "identName",
+            "qpa":                   "quantityPerAssembly",
+        },
+        "S3000L": {
+            "lsaTaskCode":           "maintenanceTaskCode",
+            "failureMode":           "failureModeCode",
+            "lruIdentifier":         "partNumber",
+            "maintenanceLevel":      "maintenanceLevelCode",
+        },
+        "SX1000i": {
+            "ipsElement":            "supportElement",
+            "ipsPlan":               "supportPlan",
+            "ipsRequirement":        "supportRequirement",
+        },
     }
 
     def __init__(self, output_dir: str = "./output",
@@ -447,7 +543,6 @@ class SemanticCrossMatcher:
         self.structural = StructuralScorer()
         self.booster = None
         self.links: list = []
-        # Fast lookup index built after load/build
         self._link_index: dict = {}   # (src_tag_norm, src_std, tgt_std) → [ConceptLink]
 
     def build(self, standard_dirs: dict, extracted_jsons: dict,
@@ -489,7 +584,13 @@ class SemanticCrossMatcher:
         self.index.build(all_records)
 
         print(f"\n  Computing cross-standard links...")
-        self.links = self._compute_all_links(all_records, list(standard_dirs.keys()))
+
+        # FIX: include SX1000i in the link graph so bridge links are generated
+        all_standards = list(standard_dirs.keys())
+        if sx1000i_dir and Path(sx1000i_dir).exists():
+            all_standards = all_standards + ["SX1000i"]
+
+        self.links = self._compute_all_links(all_records, all_standards)
 
         self._build_link_index()
         self._save()
@@ -504,19 +605,27 @@ class SemanticCrossMatcher:
         return list(seen.values())
 
     def _compute_all_links(self, records: list, standards: list) -> list:
+        # SX1000i is always included as bridge node even if not in original standards list
+        bridge_standards = set(standards) | {"SX1000i"}
         links = []
         for rec in records:
-            if rec.standard not in standards:
+            if rec.standard not in bridge_standards:
                 continue
             neighbours = self.index.search(rec, top_k=8, exclude_standard=rec.standard)
             for neighbour, cos_score in neighbours:
-                if neighbour.standard not in standards:
+                if neighbour.standard not in bridge_standards:
                     continue
                 struct_bonus = self.structural.score(rec, neighbour)
-                sx_boost = self.booster.boost(rec.tag_name, neighbour.tag_name) if self.booster else 0.0
-                name_bonus = _name_similarity(rec.tag_name, neighbour.tag_name) * 0.12
-                final_score = min(cos_score + struct_bonus + sx_boost + name_bonus, 1.0)
-                match_type = self._classify(cos_score, struct_bonus, sx_boost, name_bonus)
+                sx_boost     = self.booster.boost(rec.tag_name, neighbour.tag_name) if self.booster else 0.0
+                name_bonus   = _name_similarity(rec.tag_name, neighbour.tag_name) * 0.12
+
+                # Normalize cosine from [-1,1] to [0,1] — FAISS IndexFlatIP
+                # returns inner product on L2-normalised vecs, range is [-1,1]
+                normalized_cos = (cos_score + 1.0) / 2.0
+                final_score    = min(normalized_cos + struct_bonus + sx_boost + name_bonus, 1.0)
+
+                match_type        = self._classify(cos_score, struct_bonus, sx_boost, name_bonus)
+                relationship_type = self._classify_relationship(rec, neighbour, cos_score, name_bonus)
                 evidence = (
                     f"cos={cos_score:.3f} struct={struct_bonus:.3f} "
                     f"sx1000i={sx_boost:.3f} name={name_bonus:.3f} → final={final_score:.3f}"
@@ -528,12 +637,14 @@ class SemanticCrossMatcher:
                     target_std=neighbour.standard,
                     score=round(final_score, 4),
                     match_type=match_type,
+                    relationship_type=relationship_type,
                     evidence=evidence,
                 ))
         links.sort(key=lambda l: l.score, reverse=True)
         return links
 
     def _classify(self, cos: float, struct: float, sx: float, name: float) -> str:
+        """Classify HOW a match was found (method/evidence type)."""
         if sx > 0:
             return "sx1000i_confirmed"
         if name >= 0.08 and cos + name >= self.SCORE_THRESHOLDS["name_match"]:
@@ -546,55 +657,124 @@ class SemanticCrossMatcher:
             return "alias_match"
         return "unmapped"
 
+    def _classify_relationship(self, source, target, cos_score: float, name_bonus: float) -> str:
+        """
+        Classify WHAT KIND of semantic relationship exists between two concepts.
+        Used by the translator to decide how to handle the mapping.
+
+        equivalent        — same concept, safe to map value directly
+        partial_equivalent — overlapping but not identical, map with caution
+        transformation    — requires value restructuring or field renaming
+        reference         — weak link, don't map blindly
+        """
+        TRANSFORM_PAIRS = {
+            ("partNumberValue",        "partNumber"),
+            ("identName",              "itemNomenclature"),
+            ("fullNatoStockNumber",    "nsn"),
+            ("quantityPerAssembly",    "quantityPerNextHigherAssembly"),
+            ("dmCode",                 "dataModuleCode"),
+            ("manufacturerCodeValue",  "ncageCode"),
+            ("ncageCode",              "manufacturerCodeValue"),
+            ("itemNomenclature",       "identName"),
+            ("qpa",                    "quantityPerAssembly"),
+            ("lruPartNumber",          "partNumber"),
+            ("lruIdentifier",          "partNumber"),
+        }
+
+        # Exact name match after normalisation = equivalent
+        if _norm_key(source.tag_name) == _norm_key(target.tag_name):
+            return "equivalent"
+
+        # Very high cosine + name overlap = effectively the same concept
+        if cos_score >= 0.90 and name_bonus >= 0.08:
+            return "equivalent"
+
+        # Known aerospace transformation pairs
+        if (source.tag_name, target.tag_name) in TRANSFORM_PAIRS:
+            return "transformation"
+
+        # High cosine but different name = same concept, different standard terminology
+        if cos_score >= 0.78:
+            return "partial_equivalent"
+
+        # Weak cosine = reference link only — translator should not map blindly
+        if cos_score < 0.60:
+            return "reference"
+
+        return "partial_equivalent"
+
     def get_ontology_graph(self) -> Dict:
-            """Returns full bidirectional ontology graph for any-to-any translation"""
-            graph = {}
-            for link in self.links:
-                key = (link.source_std, link.source_tag)
-                if key not in graph:
-                    graph[key] = []
-                graph[key].append({
-                    "target_std": link.target_std,
-                    "target_tag": link.target_tag,
-                    "score": link.score,
-                    "match_type": link.match_type
-                })
-            return graph
+        """Returns full bidirectional ontology graph for any-to-any translation."""
+        graph = {}
+        for link in self.links:
+            key = (link.source_std, link.source_tag)
+            if key not in graph:
+                graph[key] = []
+            graph[key].append({
+                "target_std":       link.target_std,
+                "target_tag":       link.target_tag,
+                "score":            link.score,
+                "match_type":       link.match_type,
+                "relationship_type": link.relationship_type,
+            })
+        return graph
 
     def find_best_concept_in_target(self, source_tag: str, from_std: str, to_std: str) -> Optional[ConceptLink]:
         candidates = self.get_all_matches(source_tag, from_std, to_std, min_score=0.35)
         if candidates:
             return max(candidates, key=lambda x: x.score)
 
-        # True fallback with rich context
-        synth_def = self.harvester._synthetic_definition(source_tag)
+        # Fallback: live vector search with synthetic definition
+        synth_def  = self.harvester._synthetic_definition(source_tag)
         neighbours = self.index.search_by_text(synth_def, top_k=8, exclude_standard=from_std)
-        
-        best_link = None
+
+        best_link  = None
         best_score = 0.0
 
         for rec, cos_score in neighbours:
             if rec.standard != to_std:
                 continue
-            name_bonus = _name_similarity(source_tag, rec.tag_name) * 0.25   # module-level function
+            name_bonus  = _name_similarity(source_tag, rec.tag_name) * 0.25
             final_score = cos_score + name_bonus
 
-            if final_score > best_score and final_score >= 0.32:   # MIN_RETURN_SCORE floor
+            if final_score > best_score and final_score >= 0.32:
                 best_score = final_score
-                best_link = ConceptLink(
+                best_link  = ConceptLink(
                     source_tag=source_tag,
                     source_std=from_std,
                     target_tag=rec.tag_name,
                     target_std=to_std,
                     score=round(final_score, 4),
                     match_type="semantic_fallback",
+                    relationship_type="partial_equivalent",
                     evidence=f"cos={cos_score:.3f} + name={name_bonus:.3f}"
                 )
 
+        # Multi-hop: if still no match, try S source → SX1000i → target standard
+        if best_link is None and from_std != "SX1000i" and to_std != "SX1000i":
+            sx_match = self.get_best_match(source_tag, from_std, "SX1000i")
+            if sx_match and sx_match.score >= 0.65:
+                hop_match = self.get_best_match(sx_match.target_tag, "SX1000i", to_std)
+                if hop_match and hop_match.score >= 0.65:
+                    bridged_score = round(sx_match.score * hop_match.score, 4)
+                    best_link = ConceptLink(
+                        source_tag=source_tag,
+                        source_std=from_std,
+                        target_tag=hop_match.target_tag,
+                        target_std=to_std,
+                        score=bridged_score,
+                        match_type="sx1000i_bridge",
+                        relationship_type="partial_equivalent",
+                        evidence=(
+                            f"via SX1000i:{sx_match.target_tag} "
+                            f"hop1={sx_match.score:.3f} hop2={hop_match.score:.3f}"
+                        ),
+                    )
+
         return best_link
-    
+
     def _name_similarity(self, a: str, b: str) -> float:
-        """Simple token overlap similarity for fallback"""
+        """Simple token overlap similarity for fallback."""
         ta = set(re.sub(r'([A-Z])', r' \1', a).lower().split())
         tb = set(re.sub(r'([A-Z])', r' \1', b).lower().split())
         if not ta or not tb:
@@ -605,44 +785,71 @@ class SemanticCrossMatcher:
         """
         Build a fast dict for O(1) lookup during translation.
         Key: (normalised_tag, source_std, target_std)
-        Also add normalised-key variants to catch case mismatches.
         """
         self._link_index = {}
         for lnk in self.links:
-            # Exact key
             key = (_norm_key(lnk.source_tag), lnk.source_std, lnk.target_std)
             self._link_index.setdefault(key, []).append(lnk)
-        # Sort each bucket by score descending
         for k in self._link_index:
             self._link_index[k].sort(key=lambda l: l.score, reverse=True)
 
-    # ── Query API ──
+    # ── Query API ──────────────────────────────────────────────────────────────
 
     def get_best_match(self, tag: str, from_std: str, to_std: str, context: str = ""):
+        """
+        Priority order (fixed from v2):
+          1. STRICT_MAP  — hardcoded correct aerospace mappings, score = 1.0
+          2. AERO_ALIASES — known tag aliases, score = 0.95, runs BEFORE link_index
+          3. _link_index  — precomputed FAISS links
+          4. vector search — live embedding lookup with domain filtering
+        """
         norm = _norm_key(tag)
 
-        # 1. Fast path — precomputed link index
-        key = (norm, from_std, to_std)
-        if key in self._link_index:
-            return self._link_index[key][0]
-        # HARD RULES (prevents garbage matches)
-        STRICT_MAP = {
-            "quantityPerAssembly": "quantityPerNextHigherAssembly",
-            "identName": "itemNomenclature",
-            "partNumberValue": "partNumber",
-        }
-
-        if tag in STRICT_MAP and to_std == "S2000M":
+        # ── 1. STRICT overrides — always win ──────────────────────────────────
+        strict_targets = self.STRICT_MAP.get(to_std, {})
+        if tag in strict_targets:
             return ConceptLink(
                 source_tag=tag,
                 source_std=from_std,
-                target_tag=STRICT_MAP[tag],
+                target_tag=strict_targets[tag],
                 target_std=to_std,
                 score=1.0,
                 match_type="rule_override",
-                evidence="STRICT_RULE",
+                relationship_type="equivalent",
+                evidence="STRICT_MAP",
             )
-        # 2. Domain enforcement
+
+        # ── 2. AERO_ALIASES — before _link_index so weak FAISS can't override ─
+        alias_targets = self.AERO_ALIASES.get(to_std, {})
+        if tag in alias_targets:
+            target_tag = alias_targets[tag]
+            # Verify the target tag actually exists in the index for this standard
+            target_exists = any(
+                r.tag_name == target_tag and r.standard == to_std
+                for r in self.index.records
+            )
+            if target_exists:
+                return ConceptLink(
+                    source_tag=tag,
+                    source_std=from_std,
+                    target_tag=target_tag,
+                    target_std=to_std,
+                    score=0.95,
+                    match_type="alias_match",
+                    relationship_type="transformation",
+                    evidence="AERO_ALIAS",
+                )
+
+        # ── 3. Precomputed link index (fast O(1) path) ─────────────────────────
+        key = (norm, from_std, to_std)
+        if key in self._link_index:
+            best = self._link_index[key][0]
+            # Don't return weak reference-type links from the index —
+            # let them fall through to vector search which may find better
+            if best.score >= 0.50 or best.relationship_type not in ("reference", "unknown"):
+                return best
+
+        # ── 4. Domain enforcement setup ────────────────────────────────────────
         DOMAIN_MAP = {
             "quantity": ["quantity", "qpa", "count", "amount"],
             "identity": ["partnumber", "pnr", "ident", "nomenclature"],
@@ -655,51 +862,38 @@ class SemanticCrossMatcher:
                 source_domain = domain
                 break
 
-        # 3. Manual alias overrides
-        AERO_ALIASES = {
-            "manufacturerCodeValue": "ncageCode",
-            "identName":             "itemNomenclature",
-            "quantityPerAssembly":   "qpa",
+        # ── 5. Live vector search ──────────────────────────────────────────────
+        # Enrich context for known identity-bearing tags
+        IDENTITY_TAGS = {
+            "manufacturerCodeValue", "partNumberValue", "identName",
+            "ncageCode", "partNumber", "itemNomenclature",
         }
-        if tag in AERO_ALIASES and to_std == "S2000M":
-            for rec in self.index.records:          # FIXED: self.index.records
-                if rec.tag_name == AERO_ALIASES[tag] and rec.standard == "S2000M":
-                    return ConceptLink(
-                        source_tag=tag,
-                        source_std=from_std,        # FIXED: correct field name
-                        target_tag=rec.tag_name,
-                        target_std=to_std,          # FIXED: correct field name
-                        score=1.0,
-                        match_type="alias_match",
-                        evidence="AERO_ALIAS_BOOST",
-                    )
+        if tag in IDENTITY_TAGS:
+            context = f"{context} | part identification field in provisioning data module".strip(" |")
 
-        # 4. Live vector search
         rich_query = f"{tag} {context}" if context else tag
-        query_vec = self.index.model.encode(        # FIXED: self.index.model
-            [rich_query]
-        ).astype(np.float32)
+        query_vec  = self.index.model.encode([rich_query]).astype(np.float32)
         faiss.normalize_L2(query_vec)
 
-        D, I = self.index.index.search(query_vec, 20)  # FIXED: self.index.index
+        D, I = self.index.index.search(query_vec, 20)
 
         candidates = []
         for score, idx in zip(D[0], I[0]):
-            if idx < 0 or idx >= len(self.index.records):  # FIXED: self.index.records
+            if idx < 0 or idx >= len(self.index.records):
                 continue
-            res = self.index.records[idx]                   # FIXED: self.index.records
+            res = self.index.records[idx]
             if res.standard != to_std:
                 continue
 
             final_score = float(score)
             target_norm = _norm_key(res.tag_name)
 
-            # Domain penalty
+            # Domain penalty — multiplicative (stronger than old -= 0.35)
             if source_domain:
                 domain_keys = DOMAIN_MAP[source_domain]
                 target_def  = res.definition_text.lower()
                 if not any(k in target_norm or k in target_def for k in domain_keys):
-                    final_score -= 0.35
+                    final_score *= 0.5   # halve score for domain mismatches
 
             # Name overlap bonus
             if norm in target_norm or target_norm in norm:
@@ -707,17 +901,22 @@ class SemanticCrossMatcher:
 
             candidates.append(ConceptLink(
                 source_tag=tag,
-                source_std=from_std,        # FIXED: correct field name
+                source_std=from_std,
                 target_tag=res.tag_name,
-                target_std=to_std,          # FIXED: correct field name
+                target_std=to_std,
                 score=min(round(final_score, 4), 1.0),
                 match_type="semantic_filtered",
+                relationship_type="partial_equivalent",
                 evidence=f"domain={source_domain} cos={score:.3f}",
             ))
 
         if candidates:
             candidates.sort(key=lambda x: x.score, reverse=True)
-            return candidates[0]
+            best = candidates[0]
+            # Confidence floor: don't return weak matches that aren't rule-backed
+            if best.score < 0.50:
+                return None
+            return best
 
         return None
 
@@ -743,7 +942,12 @@ class SemanticCrossMatcher:
             links_path = Path(output_dir) / "concept_links.json"
             if links_path.exists():
                 with open(links_path) as f:
-                    matcher.links = [ConceptLink(**l) for l in json.load(f)]
+                    raw_links = json.load(f)
+                # Handle old concept_links.json that lack relationship_type field
+                matcher.links = [
+                    ConceptLink(**{k: v for k, v in l.items() if k in ConceptLink.__dataclass_fields__})
+                    for l in raw_links
+                ]
             matcher._build_link_index()
             print(f"  Cross-matcher loaded: {len(matcher.links)} links, "
                   f"{len(matcher._link_index)} unique lookup keys")
