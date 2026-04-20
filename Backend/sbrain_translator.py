@@ -14,6 +14,7 @@ import re
 from pathlib import Path
 from datetime import datetime, timezone
 from typing import Optional, List, Dict
+from sbrain_learning_memory import SBrainLearningMemory
 
 from sbrain_crossmatch import SemanticCrossMatcher
 from sbrain_ontology import SBrainOntology
@@ -57,6 +58,7 @@ class OntologyDrivenTranslator:
         self.matcher  = SemanticCrossMatcher.load(crossmatch_dir)
         self.ontology = SBrainOntology(self.matcher)
         self.translation_log: List[dict] = []
+        self.memory = SBrainLearningMemory()
         print(f"✅ S-Brain Translator v5.1 ready — {len(self.matcher.links)} semantic links")
 
     # ──────────────────────────────────────────────────────────────────────
