@@ -16,7 +16,6 @@ Changes over v2:
   10. normalized_cos = (cos + 1) / 2 applied in _compute_all_links for proper [0,1] range
   11. _classify_relationship() added as new sibling to _classify()
 """
-
 import json
 import re
 import xml.etree.ElementTree as ET
@@ -535,15 +534,18 @@ class SemanticCrossMatcher:
         },
     }
 
-    def __init__(self, output_dir: str = "./output",
-                 model_name: str = "all-MiniLM-L6-v2"):
+    def __init__(self, output_dir: str = "./output", model_name: str = "all-MiniLM-L6-v2"):
         self.output_dir = Path(output_dir)
         self.harvester = DefinitionHarvester()
         self.index = SemanticConceptIndex(model_name)
         self.structural = StructuralScorer()
         self.booster = None
         self.links: list = []
-        self._link_index: dict = {}   # (src_tag_norm, src_std, tgt_std) → [ConceptLink]
+        self._link_index: dict = {}
+
+        # Lazy import to prevent circular dependency
+        from sbrain_learning_memory import SBrainLearningMemory
+        self.learning_memory = SBrainLearningMemory()
 
     def build(self, standard_dirs: dict, extracted_jsons: dict,
               sx1000i_dir: Optional[str] = None):
@@ -803,6 +805,18 @@ class SemanticCrossMatcher:
           3. _link_index  — precomputed FAISS links
           4. vector search — live embedding lookup with domain filtering
         """
+        validated = self.learning_memory.get_validated_mapping(from_std, tag, to_std)
+        if validated:
+            return ConceptLink(
+                source_tag=tag,
+                source_std=from_std,
+                target_tag=validated["target_tag"],
+                target_std=to_std,
+                score=1.0,
+                match_type="human_validated",
+                relationship_type="equivalent",
+                evidence=f"user_confirmed_{validated.get('times_confirmed', 1)}x"
+            )
         norm = _norm_key(tag)
 
         # ── 1. STRICT overrides — always win ──────────────────────────────────
