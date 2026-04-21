@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 """
 S-Series Unified Data Platform — Backend v2.1
 Fixes:
@@ -19,11 +20,24 @@ import json
 import re
 from typing import Optional, List, Dict, Any
 from datetime import datetime, timezone
+=======
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+import uvicorn
+from pathlib import Path
+import shutil
+>>>>>>> 383348f2231604a10dca9a6e763357ab05364792
 
 from sbrain_translator import OntologyDrivenTranslator
 from sbrain_learning_memory import SBrainLearningMemory
 
+<<<<<<< HEAD
 app = FastAPI(title="S-Series Unified Data Platform v2.1")
+=======
+app = FastAPI(title="S-Brain v6.2 - Aerospace Standards Translator")
+
+>>>>>>> 383348f2231604a10dca9a6e763357ab05364792
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -31,6 +45,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+<<<<<<< HEAD
 # ── Constants ──────────────────────────────────────────────────────────────────
 OUTPUT_DIR     = Path("./output")
 INPUTS_DIR     = Path("./Inputs")
@@ -306,11 +321,20 @@ def _get_input_tree() -> dict:
 async def root():
     return {"message": "S-Series Unified Data Platform v2.1"}
 
+=======
+translator = OntologyDrivenTranslator()
+memory = SBrainLearningMemory()
+
+@app.get("/")
+async def root():
+    return {"message": "S-Brain v6.2 is running with Learning Memory"}
+>>>>>>> 383348f2231604a10dca9a6e763357ab05364792
 
 @app.post("/translate")
 async def translate(
     file: UploadFile = File(...),
     from_std: str = Form(...),
+<<<<<<< HEAD
     to_std: str = Form(...),
 ):
     temp_path = Path(f"temp_{file.filename}")
@@ -339,10 +363,44 @@ async def confirm_mapping(
     return {"status": "learned", "message": "Mapping permanently stored"}
 
 
+=======
+    to_std: str = Form(...)
+):
+    temp_path = Path(f"temp_{file.filename}")
+    with temp_path.open("wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    try:
+        result = translator.translate(
+            xml_input=str(temp_path),
+            from_std=from_std,
+            to_std=to_std
+        )
+        return {
+            "xml": result["xml_string"],
+            "coverage": result.get("coverage", 0),
+            "log": result.get("log", [])[:30]
+        }
+    finally:
+        temp_path.unlink(missing_ok=True)
+
+@app.post("/confirm-mapping")
+async def confirm_mapping(
+    from_std: str = Form(...),
+    original_tag: str = Form(...),
+    new_tag: str = Form(...),
+    to_std: str = Form(...),
+    example_value: str = Form(None)
+):
+    memory.record_correction(from_std, original_tag, new_tag, to_std, example_value)
+    return {"status": "learned", "message": "Mapping permanently stored"}
+
+>>>>>>> 383348f2231604a10dca9a6e763357ab05364792
 @app.get("/memory-stats")
 async def memory_stats():
     return memory.get_stats()
 
+<<<<<<< HEAD
 
 # ── New endpoints ──────────────────────────────────────────────────────────────
 
@@ -513,3 +571,7 @@ async def crossmatch_groups(min_score: float = Query(0.85)):
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+=======
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+>>>>>>> 383348f2231604a10dca9a6e763357ab05364792
