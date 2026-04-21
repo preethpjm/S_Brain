@@ -4,7 +4,7 @@ Fixes:
   - translate(...) call was passing literal `...` instead of actual args
   - understand_and_translate now receives proper xml_root, from_std, to_std
   - hierarchy_tracker declared BEFORE use (was after the loop that used it)
-  - Multi-standard support: S1000D ↔ S2000M ↔ S3000L ↔ SX1000i any direction
+  - Multi-standard support: S1000D ↔ S2000M ↔ S3000L ↔ SX000i any direction
   - Proper coverage stats and debug table
   - CLI accepts --standards list for batch multi-target translation
 """
@@ -14,14 +14,15 @@ import re
 from pathlib import Path
 from datetime import datetime, timezone
 from typing import Optional, List, Dict
+from sbrain_learning_memory import SBrainLearningMemory
 
 from sbrain_crossmatch import SemanticCrossMatcher
 from sbrain_ontology import SBrainOntology
 
-# All supported standards  (SX1000i has a lowercase 'i' — never blindly .upper())
-KNOWN_STANDARDS = {"S1000D", "S2000M", "S3000L", "SX1000i"}
+# All supported standards  (SX000i has a lowercase 'i' — never blindly .upper())
+KNOWN_STANDARDS = {"S1000D", "S2000M", "S3000L", "SX000i"}
 
-# Case-insensitive lookup so "sx1000i" / "SX1000I" / "sx1000I" all resolve correctly
+# Case-insensitive lookup so "SX000i" / "SX000i" / "SX000i" all resolve correctly
 _STD_NORMALISE: Dict[str, str] = {s.upper(): s for s in KNOWN_STANDARDS}
 
 
@@ -45,10 +46,10 @@ class OntologyDrivenTranslator:
     the semantic cross-matcher and ontology layer built by sbrain_core.py.
 
     Supports:
-        S1000D → S2000M, S3000L, SX1000i
-        S2000M → S1000D, S3000L, SX1000i
-        S3000L → S1000D, S2000M, SX1000i
-        SX1000i → S1000D, S2000M, S3000L
+        S1000D → S2000M, S3000L, SX000i
+        S2000M → S1000D, S3000L, SX000i
+        S3000L → S1000D, S2000M, SX000i
+        SX000i → S1000D, S2000M, S3000L
     """
 
     def __init__(self, output_dir: str = "./output"):
@@ -57,6 +58,7 @@ class OntologyDrivenTranslator:
         self.matcher  = SemanticCrossMatcher.load(crossmatch_dir)
         self.ontology = SBrainOntology(self.matcher)
         self.translation_log: List[dict] = []
+        self.memory = SBrainLearningMemory()
         print(f"✅ S-Brain Translator v5.1 ready — {len(self.matcher.links)} semantic links")
 
     # ──────────────────────────────────────────────────────────────────────

@@ -2,21 +2,20 @@
 sbrain_crossmatch.py — Semantic Cross-Standard Concept Matcher v3
 Changes over v2:
   1. ConceptLink gains relationship_type field (equivalent/partial_equivalent/transformation/reference)
-  2. SX1000iBooster fixed — bidirectional alias lookup so bridge confirmations actually fire
-  3. SX1000i included as bridge node in _compute_all_links (was silently excluded before)
-  4. build() passes SX1000i into standards list so links are generated
+  2. SX000iBooster fixed — bidirectional alias lookup so bridge confirmations actually fire
+  3. SX000i included as bridge node in _compute_all_links (was silently excluded before)
+  4. build() passes SX000i into standards list so links are generated
   5. get_best_match() priority order fixed:
        STRICT_MAP → AERO_ALIASES → _link_index → vector search
      (previously _link_index ran first, returning weak semantic hits before aliases)
   6. Domain penalty changed from -= 0.35 to *= 0.5 (stronger enforcement)
   7. Confidence floor raised: get_best_match() won't return score < 0.50 for
      non-rule matches, preventing garbage weak matches from reaching the translator
-  8. find_best_concept_in_target() gains SX1000i multi-hop fallback
+  8. find_best_concept_in_target() gains SX000i multi-hop fallback
   9. Synthetic definitions enriched with domain classification
   10. normalized_cos = (cos + 1) / 2 applied in _compute_all_links for proper [0,1] range
   11. _classify_relationship() added as new sibling to _classify()
 """
-
 import json
 import re
 import xml.etree.ElementTree as ET
@@ -242,9 +241,9 @@ class DefinitionHarvester:
             print(f"    Warning XMI {xmi_path}: {e}")
         return records
 
-    def harvest_sx1000i(self, sx1000i_dir: str) -> list:
+    def harvest_SX000i(self, SX000i_dir: str) -> list:
         records = []
-        sx_dir = Path(sx1000i_dir)
+        sx_dir = Path(SX000i_dir)
         seen = set()
 
         for xsd_file in sorted(sx_dir.glob("**/*.xsd")):
@@ -258,26 +257,26 @@ class DefinitionHarvester:
                         continue
                     seen.add(name)
                     defn = self._extract_xsd_annotation(elem)
-                    cross_refs = self._extract_sx1000i_crossrefs(elem)
+                    cross_refs = self._extract_SX000i_crossrefs(elem)
                     parents = self._find_parents_via_map(elem, parent_map)
                     records.append(ConceptRecord(
                         tag_name=name,
-                        standard="SX1000i",
+                        standard="SX000i",
                         definition_text=defn or self._synthetic_definition(name, elem.get("type",""), parents),
                         aliases=cross_refs,
                         source_file=xsd_file.name,
-                        source="sx1000i"
+                        source="SX000i"
                     ))
             except Exception as e:
-                print(f"    Warning SX1000i XSD {xsd_file.name}: {e}")
+                print(f"    Warning SX000i XSD {xsd_file.name}: {e}")
 
         for xmi_file in sx_dir.glob("**/*.xmi"):
-            records.extend(self.harvest_xmi(str(xmi_file), "SX1000i"))
+            records.extend(self.harvest_xmi(str(xmi_file), "SX000i"))
 
-        print(f"    SX1000i: {len(records)} concept records harvested")
+        print(f"    SX000i: {len(records)} concept records harvested")
         return records
 
-    def _extract_sx1000i_crossrefs(self, elem) -> list:
+    def _extract_SX000i_crossrefs(self, elem) -> list:
         aliases = []
         for ann in elem.findall(f".//{{{XS_NS}}}documentation"):
             if ann.text:
@@ -323,8 +322,8 @@ class SemanticConceptIndex:
 
         local_model_path = Path(__file__).resolve().parent.parent / "models" / "all-MiniLM-L6-v2"
         print(f"Loading embedding model from: {local_model_path}")
-        self.model = SentenceTransformer(str(local_model_path))
-        #self.model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+        #self.model = SentenceTransformer(str(local_model_path))
+        self.model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
         self.records: list = []
         self.embeddings: Optional[np.ndarray] = None
@@ -423,18 +422,18 @@ class StructuralScorer:
 
 
 # ─────────────────────────────────────────────
-# SX1000i BOOSTER  (fixed — bidirectional)
+# SX000i BOOSTER  (fixed — bidirectional)
 # ─────────────────────────────────────────────
 
-class SX1000iBooster:
+class SX000iBooster:
     """
     Fixed bidirectional alias lookup.
 
     Old bug: confirmed[alias] = {sx_tag} — so boost(src, tgt) checked whether
-    the target SX1000i tag was in confirmed[source], which almost never fired
-    because source tags are S1000D/S2000M names, not SX1000i names.
+    the target SX000i tag was in confirmed[source], which almost never fired
+    because source tags are S1000D/S2000M names, not SX000i names.
 
-    Fix: store bidirectional edges so any pair sharing a common SX1000i bridge
+    Fix: store bidirectional edges so any pair sharing a common SX000i bridge
     node gets the confirmation boost.
     """
     def __init__(self, sx_records: list):
@@ -452,7 +451,7 @@ class SX1000iBooster:
         tk = _norm_key(target_tag)
         source_connections = self.confirmed.get(sk, set())
         target_connections = self.confirmed.get(tk, set())
-        # Strongest signal: source and target share a common SX1000i bridge node
+        # Strongest signal: source and target share a common SX000i bridge node
         if source_connections & target_connections:
             return 0.20
         # Weaker signal: one is directly an alias of the other
@@ -470,7 +469,7 @@ class SemanticCrossMatcher:
     SCORE_THRESHOLDS = {
         "definition_match":  0.78,
         "structural_match":  0.68,
-        "sx1000i_confirmed": 0.60,
+        "SX000i_confirmed": 0.60,
         "name_match":        0.55,
         "alias_match":       0.50,
         "unmapped":          0.0,
@@ -528,25 +527,28 @@ class SemanticCrossMatcher:
             "lruIdentifier":         "partNumber",
             "maintenanceLevel":      "maintenanceLevelCode",
         },
-        "SX1000i": {
+        "SX000i": {
             "ipsElement":            "supportElement",
             "ipsPlan":               "supportPlan",
             "ipsRequirement":        "supportRequirement",
         },
     }
 
-    def __init__(self, output_dir: str = "./output",
-                 model_name: str = "all-MiniLM-L6-v2"):
+    def __init__(self, output_dir: str = "./output", model_name: str = "all-MiniLM-L6-v2"):
         self.output_dir = Path(output_dir)
         self.harvester = DefinitionHarvester()
         self.index = SemanticConceptIndex(model_name)
         self.structural = StructuralScorer()
         self.booster = None
         self.links: list = []
-        self._link_index: dict = {}   # (src_tag_norm, src_std, tgt_std) → [ConceptLink]
+        self._link_index: dict = {}
+
+        # Lazy import to prevent circular dependency
+        from sbrain_learning_memory import SBrainLearningMemory
+        self.learning_memory = SBrainLearningMemory()
 
     def build(self, standard_dirs: dict, extracted_jsons: dict,
-              sx1000i_dir: Optional[str] = None):
+              SX000i_dir: Optional[str] = None):
         all_records: list = []
 
         for std, xsd_dir in standard_dirs.items():
@@ -565,12 +567,12 @@ class SemanticCrossMatcher:
                 all_records.extend(pdf_recs)
 
         sx_records = []
-        if sx1000i_dir and Path(sx1000i_dir).exists():
-            print(f"\n  Harvesting SX1000i...")
-            sx_records = self.harvester.harvest_sx1000i(sx1000i_dir)
+        if SX000i_dir and Path(SX000i_dir).exists():
+            print(f"\n  Harvesting SX000i...")
+            sx_records = self.harvester.harvest_SX000i(SX000i_dir)
             all_records.extend(sx_records)
 
-        self.booster = SX1000iBooster(sx_records)
+        self.booster = SX000iBooster(sx_records)
 
         all_records = self._dedup(all_records)
         print(f"\n  Total concept records after dedup: {len(all_records)}")
@@ -585,10 +587,10 @@ class SemanticCrossMatcher:
 
         print(f"\n  Computing cross-standard links...")
 
-        # FIX: include SX1000i in the link graph so bridge links are generated
+        # FIX: include SX000i in the link graph so bridge links are generated
         all_standards = list(standard_dirs.keys())
-        if sx1000i_dir and Path(sx1000i_dir).exists():
-            all_standards = all_standards + ["SX1000i"]
+        if SX000i_dir and Path(SX000i_dir).exists():
+            all_standards = all_standards + ["SX000i"]
 
         self.links = self._compute_all_links(all_records, all_standards)
 
@@ -605,8 +607,8 @@ class SemanticCrossMatcher:
         return list(seen.values())
 
     def _compute_all_links(self, records: list, standards: list) -> list:
-        # SX1000i is always included as bridge node even if not in original standards list
-        bridge_standards = set(standards) | {"SX1000i"}
+        # SX000i is always included as bridge node even if not in original standards list
+        bridge_standards = set(standards) | {"SX000i"}
         links = []
         for rec in records:
             if rec.standard not in bridge_standards:
@@ -628,7 +630,7 @@ class SemanticCrossMatcher:
                 relationship_type = self._classify_relationship(rec, neighbour, cos_score, name_bonus)
                 evidence = (
                     f"cos={cos_score:.3f} struct={struct_bonus:.3f} "
-                    f"sx1000i={sx_boost:.3f} name={name_bonus:.3f} → final={final_score:.3f}"
+                    f"SX000i={sx_boost:.3f} name={name_bonus:.3f} → final={final_score:.3f}"
                 )
                 links.append(ConceptLink(
                     source_tag=rec.tag_name,
@@ -646,7 +648,7 @@ class SemanticCrossMatcher:
     def _classify(self, cos: float, struct: float, sx: float, name: float) -> str:
         """Classify HOW a match was found (method/evidence type)."""
         if sx > 0:
-            return "sx1000i_confirmed"
+            return "SX000i_confirmed"
         if name >= 0.08 and cos + name >= self.SCORE_THRESHOLDS["name_match"]:
             return "name_match"
         if cos >= self.SCORE_THRESHOLDS["definition_match"]:
@@ -750,11 +752,11 @@ class SemanticCrossMatcher:
                     evidence=f"cos={cos_score:.3f} + name={name_bonus:.3f}"
                 )
 
-        # Multi-hop: if still no match, try S source → SX1000i → target standard
-        if best_link is None and from_std != "SX1000i" and to_std != "SX1000i":
-            sx_match = self.get_best_match(source_tag, from_std, "SX1000i")
+        # Multi-hop: if still no match, try S source → SX000i → target standard
+        if best_link is None and from_std != "SX000i" and to_std != "SX000i":
+            sx_match = self.get_best_match(source_tag, from_std, "SX000i")
             if sx_match and sx_match.score >= 0.65:
-                hop_match = self.get_best_match(sx_match.target_tag, "SX1000i", to_std)
+                hop_match = self.get_best_match(sx_match.target_tag, "SX000i", to_std)
                 if hop_match and hop_match.score >= 0.65:
                     bridged_score = round(sx_match.score * hop_match.score, 4)
                     best_link = ConceptLink(
@@ -763,10 +765,10 @@ class SemanticCrossMatcher:
                         target_tag=hop_match.target_tag,
                         target_std=to_std,
                         score=bridged_score,
-                        match_type="sx1000i_bridge",
+                        match_type="SX000i_bridge",
                         relationship_type="partial_equivalent",
                         evidence=(
-                            f"via SX1000i:{sx_match.target_tag} "
+                            f"via SX000i:{sx_match.target_tag} "
                             f"hop1={sx_match.score:.3f} hop2={hop_match.score:.3f}"
                         ),
                     )
@@ -803,6 +805,18 @@ class SemanticCrossMatcher:
           3. _link_index  — precomputed FAISS links
           4. vector search — live embedding lookup with domain filtering
         """
+        validated = self.learning_memory.get_validated_mapping(from_std, tag, to_std)
+        if validated:
+            return ConceptLink(
+                source_tag=tag,
+                source_std=from_std,
+                target_tag=validated["target_tag"],
+                target_std=to_std,
+                score=1.0,
+                match_type="human_validated",
+                relationship_type="equivalent",
+                evidence=f"user_confirmed_{validated.get('times_confirmed', 1)}x"
+            )
         norm = _norm_key(tag)
 
         # ── 1. STRICT overrides — always win ──────────────────────────────────

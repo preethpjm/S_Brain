@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S-Series Unified Data Platform</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg:       #09090f;
+    --surface:  #10101c;
+    --surface2: #181828;
+    --border:   #252540;
+    --text:     #e0e0f0;
+    --muted:    #6060a0;
+    --s1000d:   #3B82F6;
+    --s2000m:   #22C55E;
+    --s3000l:   #F97316;
+    --SX000i:  #A855F7;
+    --accent:   #6366F1;
+    --danger:   #EF4444;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Header */
+  header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 0 20px;
+    height: 52px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    white-space: nowrap;
+  }
+  .logo span { color: var(--accent); }
+  .header-stats { display: flex; gap: 20px; flex: 1; }
+  .stat-pill { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+  .stat-pill strong { font-family: 'Space Mono', monospace; color: var(--text); font-size: 12px; }
+  .header-search {
+    display: flex; align-items: center;
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
+    padding: 4px 12px; gap: 8px; width: 240px;
+  }
+  .header-search input {
+    background: none; border: none; outline: none;
+    color: var(--text); font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; width: 100%;
+  }
+  .header-search input::placeholder { color: var(--muted); }
+
+  /* Layout */
+  .main { display: grid; grid-template-columns: 210px 1fr 290px; height: calc(100vh - 52px); overflow: hidden; }
+
+  /* Sidebar */
+  .sidebar { background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+  .sidebar-section { border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .sidebar-title { font-size: 9px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); padding: 10px 14px 6px; }
+  .std-btns { display: flex; flex-direction: column; gap: 3px; padding: 3px 10px 8px; }
+  .std-btn {
+    display: flex; align-items: center; gap: 8px; padding: 7px 10px;
+    border-radius: 6px; border: 1px solid transparent; background: none; cursor: pointer;
+    transition: all 0.15s; font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; color: var(--muted); text-align: left;
+  }
+  .std-btn.active { background: var(--surface2); border-color: var(--border); color: var(--text); }
+  .std-btn:hover { background: var(--surface2); color: var(--text); }
+  .std-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .std-badge { margin-left: auto; font-family: 'Space Mono', monospace; font-size: 10px; color: var(--muted); }
+  .unified-btn {
+    margin: 2px 10px 8px; width: calc(100% - 20px); padding: 7px;
+    border-radius: 6px; border: 1px solid var(--accent); background: none;
+    color: var(--accent); font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; cursor: pointer; transition: all 0.15s;
+  }
+  .unified-btn:hover, .unified-btn.active { background: var(--accent); color: #fff; }
+
+  /* File tree */
+  .file-tree { flex: 1; overflow-y: auto; padding: 4px 4px 10px; }
+  .tree-node {
+    font-size: 11px; padding: 4px 8px; cursor: pointer; border-radius: 4px;
+    transition: background 0.1s; display: flex; align-items: center; gap: 6px; color: var(--muted);
+  }
+  .tree-node:hover { background: var(--surface2); color: var(--text); }
+  .tree-children { padding-left: 14px; }
+
+  /* View tabs */
+  .view-tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 14px; flex-shrink: 0; }
+  .view-tab { padding: 10px 14px; font-size: 11px; font-weight: 500; letter-spacing: 0.5px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap; }
+  .view-tab:hover { color: var(--text); }
+  .view-tab.active { color: var(--text); border-bottom-color: var(--accent); }
+
+  /* Center */
+  .center { display: flex; flex-direction: column; overflow: hidden; }
+  .view-panel { display: none; flex: 1; overflow: hidden; }
+  .view-panel.active { display: flex; flex-direction: column; }
+
+  /* Dashboard */
+  .dashboard { padding: 18px; overflow-y: auto; flex: 1; }
+  .dash-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+  .dash-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+  .dash-card-label { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .dash-card-value { font-family: 'Space Mono', monospace; font-size: 26px; font-weight: 700; }
+  .dash-card-sub { font-size: 10px; color: var(--muted); margin-top: 3px; }
+  .std-dist { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+  .std-dist-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; position: relative; overflow: hidden; }
+  .std-dist-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; }
+  .std-dist-name { font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; margin-bottom: 6px; }
+  .std-dist-count { font-size: 20px; font-weight: 600; }
+  .std-dist-sub { font-size: 10px; color: var(--muted); }
+  .rel-types { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+  .rel-type-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+  .rel-type-label { font-size: 11px; color: var(--muted); width: 150px; flex-shrink: 0; }
+  .rel-bar-wrap { flex: 1; background: var(--border); border-radius: 3px; height: 5px; overflow: hidden; }
+  .rel-bar { height: 100%; border-radius: 3px; background: var(--accent); transition: width 0.6s ease; }
+  .rel-count { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--muted); width: 55px; text-align: right; }
+
+  /* Graph */
+  #graph-container { flex: 1; position: relative; overflow: hidden; }
+  #graph-svg { width: 100%; height: 100%; cursor: grab; }
+  #graph-svg:active { cursor: grabbing; }
+  .graph-controls { position: absolute; bottom: 14px; right: 14px; display: flex; flex-direction: column; gap: 4px; }
+  .graph-btn {
+    width: 32px; height: 32px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; color: var(--text); font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: background 0.1s;
+  }
+  .graph-btn:hover { background: var(--surface2); }
+  .graph-legend {
+    position: absolute; bottom: 14px; left: 14px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;
+    display: flex; flex-direction: column; gap: 5px;
+  }
+  .legend-row { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .graph-info-bar {
+    position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+    background: var(--surface); border: 1px solid var(--border); border-radius: 5px;
+    padding: 5px 14px; font-size: 11px; color: var(--muted); pointer-events: none;
+  }
+  .graph-warn {
+    position: absolute; top: 42px; left: 50%; transform: translateX(-50%);
+    background: rgba(239,68,68,0.1); border: 1px solid var(--danger); border-radius: 5px;
+    padding: 5px 14px; font-size: 11px; color: var(--danger); pointer-events: none;
+    display: none;
+  }
+
+  /* D3 */
+  .d3-node circle { cursor: pointer; transition: stroke-width 0.1s; }
+  .d3-node circle:hover { stroke: #fff !important; stroke-width: 2 !important; }
+  .d3-node.selected circle { stroke: #fff !important; stroke-width: 2.5 !important; }
+  .d3-node text { font-family: 'IBM Plex Sans', sans-serif; font-size: 8px; fill: rgba(255,255,255,0.65); pointer-events: none; user-select: none; }
+  .d3-link { stroke-width: 1; fill: none; }
+  .d3-link.highlighted { stroke-width: 2; }
+  @keyframes impactPulse { 0%,100%{stroke-width:1} 50%{stroke-width:4; stroke:var(--danger);} }
+  .d3-node.impacted circle { animation: impactPulse 1s ease-in-out 3; }
+
+  /* Source type badges */
+  .source-badge {
+    display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9px;
+    font-family: 'Space Mono', monospace; letter-spacing: 0.5px; margin-bottom: 6px;
+  }
+
+  /* Search */
+  .search-panel { flex: 1; overflow-y: auto; padding: 14px; }
+  .search-result { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 11px 13px; margin-bottom: 7px; cursor: pointer; transition: border-color 0.1s; }
+  .search-result:hover { border-color: var(--accent); }
+  .search-result-tag { font-family: 'Space Mono', monospace; font-size: 12px; margin-bottom: 3px; }
+  .search-result-text { font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+
+  /* Dedup */
+  .dedup-panel { flex: 1; overflow-y: auto; padding: 14px; }
+  .dedup-group { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; overflow: hidden; }
+  .dedup-group-header { display: flex; align-items: center; gap: 8px; padding: 9px 13px; cursor: pointer; border-bottom: 1px solid var(--border); background: var(--surface2); }
+  .dedup-group-id { font-family: 'Space Mono', monospace; font-size: 11px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dedup-size-badge { background: var(--accent); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 9px; font-weight: 600; }
+  .dedup-members { padding: 9px 13px; display: none; flex-wrap: wrap; gap: 5px; }
+  .dedup-members.open { display: flex; }
+  .dedup-chip { display: flex; align-items: center; gap: 4px; background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 3px 7px; font-size: 11px; color: var(--muted); }
+
+  /* Export */
+  .export-panel { flex: 1; overflow-y: auto; padding: 20px; }
+  .export-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-bottom: 12px; }
+  .export-card-title { font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .form-label { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 4px; }
+  .form-select, .form-input {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 7px 10px; color: var(--text); font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 12px; width: 100%; margin-bottom: 10px; outline: none;
+  }
+  .form-select:focus, .form-input:focus { border-color: var(--accent); }
+  input[type=file].form-input { padding: 5px 8px; }
+  .action-btn { background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 8px 16px; font-size: 12px; font-family: 'IBM Plex Sans', sans-serif; cursor: pointer; transition: opacity 0.15s; }
+  .action-btn:hover { opacity: 0.85; }
+  .export-result { margin-top: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; padding: 10px; font-family: 'Space Mono', monospace; font-size: 10px; color: var(--muted); max-height: 180px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; display: none; }
+
+  /* Right panel */
+  .right-panel { background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+  .panel-header { padding: 11px 13px; border-bottom: 1px solid var(--border); font-size: 9px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; }
+  .panel-close { cursor: pointer; font-size: 14px; color: var(--muted); transition: color 0.1s; }
+  .panel-close:hover { color: var(--text); }
+  .node-detail { flex: 1; overflow-y: auto; padding: 13px; }
+  .node-tag { font-family: 'Space Mono', monospace; font-size: 15px; font-weight: 700; margin-bottom: 4px; word-break: break-all; }
+  .node-std-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 10px; font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; color: #fff; }
+  .attr-section { margin-bottom: 14px; }
+  .attr-section-title { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 7px; }
+  .attr-row { display: flex; gap: 7px; margin-bottom: 5px; font-size: 11px; }
+  .attr-key { color: var(--muted); flex-shrink: 0; min-width: 85px; }
+  .attr-edit { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-family: 'IBM Plex Sans', sans-serif; font-size: 11px; padding: 4px 7px; width: 100%; outline: none; }
+  .attr-edit:focus { border-color: var(--accent); }
+  .link-chip { display: flex; align-items: center; gap: 5px; padding: 5px 8px; background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; margin-bottom: 4px; cursor: pointer; transition: border-color 0.1s; font-size: 11px; }
+  .link-chip:hover { border-color: var(--accent); }
+  .link-score { margin-left: auto; font-family: 'Space Mono', monospace; font-size: 10px; color: var(--muted); }
+  .save-btn { margin-top: 10px; width: 100%; padding: 8px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; cursor: pointer; transition: opacity 0.15s; }
+  .save-btn:hover { opacity: 0.85; }
+  .impact-banner { margin-top: 8px; background: rgba(239,68,68,0.1); border: 1px solid var(--danger); border-radius: 6px; padding: 7px 11px; font-size: 11px; color: var(--danger); display: none; }
+
+  /* Misc */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .loading { display: flex; align-items: center; justify-content: center; flex: 1; color: var(--muted); font-size: 12px; gap: 10px; flex-direction: column; }
+  .spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 9px 18px; font-size: 12px; z-index: 9999; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+  .empty-hint { color: var(--muted); font-size: 12px; text-align: center; margin-top: 32px; line-height: 1.8; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">S<span>-</span>SERIES <span>UNIFIED</span> DATA PLATFORM</div>
+  <div class="header-stats">
+    <div class="stat-pill">NODES <strong id="h-nodes">—</strong></div>
+    <div class="stat-pill">LINKS <strong id="h-links">—</strong></div>
+    <div class="stat-pill">ENGINE <strong>S-Brain v6.2</strong></div>
+  </div>
+  <div class="header-search">
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input id="global-search" type="text" placeholder="RAG semantic search…" />
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">Standards Filter</div>
+      <div class="std-btns">
+        <button class="std-btn active" data-std="S1000D" onclick="toggleStd('S1000D',this)">
+          <span class="std-dot" style="background:var(--s1000d)"></span>S1000D
+          <span class="std-badge" id="badge-S1000D">—</span>
+        </button>
+        <button class="std-btn active" data-std="S2000M" onclick="toggleStd('S2000M',this)">
+          <span class="std-dot" style="background:var(--s2000m)"></span>S2000M
+          <span class="std-badge" id="badge-S2000M">—</span>
+        </button>
+        <button class="std-btn active" data-std="S3000L" onclick="toggleStd('S3000L',this)">
+          <span class="std-dot" style="background:var(--s3000l)"></span>S3000L
+          <span class="std-badge" id="badge-S3000L">—</span>
+        </button>
+        <button class="std-btn active" data-std="SX000i" onclick="toggleStd('SX000i',this)">
+          <span class="std-dot" style="background:var(--SX000i)"></span>SX000i
+          <span class="std-badge" id="badge-SX000i">—</span>
+        </button>
+      </div>
+      <button class="unified-btn active" id="unified-btn" onclick="toggleUnified()">⬡ Unified View</button>
+    </div>
+
+    <div class="sidebar-section" style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
+      <div class="sidebar-title">File Explorer</div>
+      <div class="file-tree" id="file-tree">
+        <div class="tree-node" style="font-size:10px;">Loading…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Center -->
+  <div class="center">
+    <div class="view-tabs">
+      <div class="view-tab active"  onclick="switchView('dashboard',this)">Dashboard</div>
+      <div class="view-tab"         onclick="switchView('graph',this)">Graph</div>
+      <div class="view-tab"         onclick="switchView('search',this)">Search</div>
+      <div class="view-tab"         onclick="switchView('dedup',this)">Deduplication</div>
+      <div class="view-tab"         onclick="switchView('export',this)">Export</div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="view-panel active" id="view-dashboard">
+      <div class="dashboard" id="dash-content">
+        <div class="loading"><div class="spinner"></div><span>Loading platform data…</span></div>
+      </div>
+    </div>
+
+    <!-- Graph -->
+    <div class="view-panel" id="view-graph">
+      <div id="graph-container">
+        <div class="loading" id="graph-loading"><div class="spinner"></div><span>Building graph…</span></div>
+        <svg id="graph-svg" style="display:none"></svg>
+        <div class="graph-info-bar" id="graph-info"></div>
+        <div class="graph-warn"    id="graph-warn"></div>
+        <div class="graph-legend">
+          <div class="legend-row"><div class="legend-dot" style="background:var(--s1000d)"></div>S1000D · XSD Schema</div>
+          <div class="legend-row"><div class="legend-dot" style="background:var(--s2000m)"></div>S2000M · Entity</div>
+          <div class="legend-row"><div class="legend-dot" style="background:var(--s3000l)"></div>S3000L · Concept</div>
+          <div class="legend-row"><div class="legend-dot" style="background:var(--SX000i)"></div>SX000i · ILS</div>
+        </div>
+        <div class="graph-controls">
+          <button class="graph-btn" onclick="zoomG(1.3)">+</button>
+          <button class="graph-btn" onclick="zoomG(0.77)">−</button>
+          <button class="graph-btn" onclick="resetZoom()">⌂</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="view-panel" id="view-search">
+      <div style="padding:12px 14px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;">
+        <input id="search-input" type="text" class="form-input" style="margin:0;flex:1;"
+          placeholder="Search across all standards semantically…"
+          onkeydown="if(event.key==='Enter')doSearch()" />
+        <button class="action-btn" onclick="doSearch()">Search</button>
+      </div>
+      <div class="search-panel" id="search-results">
+        <div class="empty-hint">Enter a query to search using RAG semantic matching</div>
+      </div>
+    </div>
+
+    <!-- Deduplication -->
+    <div class="view-panel" id="view-dedup">
+      <div style="padding:11px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;">
+        <span style="font-size:11px;color:var(--muted);">Min confidence:</span>
+        <input type="range" id="dedup-threshold" min="50" max="100" value="85"
+          oninput="document.getElementById('dedup-val').textContent=this.value+'%';loadDedup()"
+          style="flex:1;accent-color:var(--accent);" />
+        <span id="dedup-val" style="font-family:'Space Mono',monospace;font-size:11px;width:38px;">85%</span>
+        <span id="dedup-count" style="font-size:11px;color:var(--muted);"></span>
+      </div>
+      <div class="dedup-panel" id="dedup-content">
+        <div class="loading"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- Export -->
+    <div class="view-panel" id="view-export">
+      <div class="export-panel">
+        <div class="export-card">
+          <div class="export-card-title">
+            <span style="width:9px;height:9px;border-radius:50%;background:var(--accent);display:inline-block;"></span>
+            Translate & Export XML
+          </div>
+          <p style="font-size:11px;color:var(--muted);margin-bottom:12px;">Upload an XML file and translate it between standards using S-Brain's ontology engine.</p>
+          <label class="form-label">Source File</label>
+          <input type="file" id="export-file" accept=".xml" class="form-input" />
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div>
+              <label class="form-label">From Standard</label>
+              <select id="export-from" class="form-select">
+                <option value="S1000D">S1000D</option>
+                <option value="S2000M">S2000M</option>
+                <option value="S3000L">S3000L</option>
+                <option value="SX000i">SX000i</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">To Standard</label>
+              <select id="export-to" class="form-select">
+                <option value="S2000M">S2000M</option>
+                <option value="S1000D">S1000D</option>
+                <option value="S3000L">S3000L</option>
+                <option value="SX000i">SX000i</option>
+              </select>
+            </div>
+          </div>
+          <button class="action-btn" onclick="doExport()">⬇ Export XML</button>
+          <div id="export-result" class="export-result"></div>
+        </div>
+
+        <div class="export-card">
+          <div class="export-card-title">
+            <span style="width:9px;height:9px;border-radius:50%;background:var(--s2000m);display:inline-block;"></span>
+            Confirm Tag Mapping (Learning Memory)
+          </div>
+          <p style="font-size:11px;color:var(--muted);margin-bottom:12px;">Teach the system a correct mapping — stored permanently, overrides AI inference.</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div>
+              <label class="form-label">From</label>
+              <select id="map-from" class="form-select">
+                <option>S1000D</option><option>S2000M</option><option>S3000L</option><option>SX000i</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">To</label>
+              <select id="map-to" class="form-select">
+                <option>S2000M</option><option>S1000D</option><option>S3000L</option><option>SX000i</option>
+              </select>
+            </div>
+          </div>
+          <label class="form-label">Original Tag</label>
+          <input id="map-orig" type="text" class="form-input" placeholder="e.g. partNumberValue" />
+          <label class="form-label">Mapped Tag</label>
+          <input id="map-new" type="text" class="form-input" placeholder="e.g. itemPartNumber" />
+          <button class="action-btn" onclick="confirmMapping()">✓ Confirm Mapping</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="right-panel">
+    <div class="panel-header">
+      Node Details
+      <span class="panel-close" onclick="clearDetail()">✕</span>
+    </div>
+    <div class="node-detail" id="node-detail">
+      <div class="empty-hint">Click a node in the graph<br>to view its details</div>
+    </div>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Config ────────────────────────────────────────────────────────────────────
+const API = 'http://localhost:8000';
+
+// CRITICAL: SX000i must preserve lowercase 'i' throughout
+const STANDARDS = ['S1000D', 'S2000M', 'S3000L', 'SX000i'];
+const STD_COLORS = {
+  S1000D: '#3B82F6', S2000M: '#22C55E', S3000L: '#F97316', SX000i: '#A855F7'
+};
+
+// Case-insensitive std lookup preserving canonical form
+const STD_CANON = {};
+STANDARDS.forEach(s => STD_CANON[s.toUpperCase()] = s);
+function canonStd(s) { return STD_CANON[s.toUpperCase()] || s; }
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let activeStds  = new Set(STANDARDS);
+let isUnified   = true;
+let graphData   = null;
+let svgZoom     = null;
+let graphLoaded = false;
+
+// ── Utils ─────────────────────────────────────────────────────────────────────
+function toast(msg, ms = 2500) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._tid);
+  el._tid = setTimeout(() => el.classList.remove('show'), ms);
+}
+
+async function apiFetch(path, opts = {}) {
+  const r = await fetch(API + path, opts);
+  if (!r.ok) throw new Error(`${r.status} ${await r.text()}`);
+  return r;
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    const r  = await apiFetch('/load-data');
+    const d  = await r.json();
+    renderDashboard(d);
+    renderFileTree(d.input_tree);
+    document.getElementById('h-nodes').textContent = (d.total_nodes || 0).toLocaleString();
+    document.getElementById('h-links').textContent = (d.total_links || 0).toLocaleString();
+    STANDARDS.forEach(std => {
+      const el = document.getElementById('badge-' + std);
+      if (el) el.textContent = (d.node_counts || {})[std] ?? '—';
+    });
+  } catch(e) {
+    document.getElementById('dash-content').innerHTML =
+      `<div class="loading" style="color:var(--danger);">
+        Cannot connect to backend at ${API}<br>
+        <small style="color:var(--muted);margin-top:8px;">Start the FastAPI server: python app.py</small>
+      </div>`;
+  }
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+function renderDashboard(d) {
+  const total = d.total_nodes || 0;
+  const html = `
+    <div class="dash-grid">
+      <div class="dash-card">
+        <div class="dash-card-label">Total Nodes</div>
+        <div class="dash-card-value">${total.toLocaleString()}</div>
+        <div class="dash-card-sub">Across 4 standards</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-label">Crossmatch Links</div>
+        <div class="dash-card-value">${(d.total_links || 0).toLocaleString()}</div>
+        <div class="dash-card-sub">Semantic relationships</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-label">Ontology Entities</div>
+        <div class="dash-card-value">${(d.ontology_entity_count || 0).toLocaleString()}</div>
+        <div class="dash-card-sub">${d.ontology_cross_refs || 0} cross-references</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-label">Learned Mappings</div>
+        <div class="dash-card-value">${d.memory_stats?.total_learned_mappings || 0}</div>
+        <div class="dash-card-sub">Human-confirmed</div>
+      </div>
+    </div>
+
+    <div class="std-dist">
+      ${STANDARDS.map(std => {
+        const cnt = (d.node_counts || {})[std] || 0;
+        const pct = total ? Math.round(cnt / total * 100) : 0;
+        const src = d.source_breakdown?.[std] || {};
+        const srcStr = Object.entries(src).map(([k,v]) => `${k}:${v}`).join(', ');
+        return `
+          <div class="std-dist-card">
+            <div class="std-dist-name" style="color:${STD_COLORS[std]}">${std}</div>
+            <div class="std-dist-count">${cnt.toLocaleString()}</div>
+            <div class="std-dist-sub">${pct}% of total</div>
+            ${srcStr ? `<div class="std-dist-sub" style="margin-top:4px;font-size:9px;">${srcStr}</div>` : ''}
+            <div class="std-dist-bar" style="background:${STD_COLORS[std]}"></div>
+          </div>`;
+      }).join('')}
+    </div>
+
+    <div class="rel-types">
+      <div class="attr-section-title" style="margin-bottom:12px;">Relationship Type Distribution</div>
+      ${Object.entries(d.relationship_types || {}).sort((a,b)=>b[1]-a[1]).map(([rt, cnt]) => {
+        const max = Math.max(...Object.values(d.relationship_types || {1:1}));
+        return `<div class="rel-type-row">
+          <div class="rel-type-label">${rt}</div>
+          <div class="rel-bar-wrap"><div class="rel-bar" style="width:${Math.round(cnt/max*100)}%"></div></div>
+          <div class="rel-count">${cnt.toLocaleString()}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+  document.getElementById('dash-content').innerHTML = html;
+}
+
+// ── File Tree ─────────────────────────────────────────────────────────────────
+function renderFileTree(tree) {
+  const el = document.getElementById('file-tree');
+  if (!tree) { el.innerHTML = '<div class="tree-node" style="font-size:10px;">No Inputs/ folder found</div>'; return; }
+  el.innerHTML = renderTreeNode(tree, 0);
+}
+
+function renderTreeNode(node, depth) {
+  if (!node) return '';
+  const isStd = STANDARDS.includes(node.standard);
+  const color = isStd ? STD_COLORS[node.standard] : 'var(--muted)';
+  const icon  = node.type === 'folder' ? (isStd ? '◈' : '▸') : (node.ext === '.xml' ? '◻' : '·');
+  const click = isStd ? `onclick="filterByStd('${node.standard}')"` : '';
+  const children = (node.children || []).map(c => renderTreeNode(c, depth + 1)).join('');
+  return `
+    <div ${click} class="tree-node" style="color:${color};padding-left:${8 + depth * 10}px;">
+      <span>${icon}</span> ${node.name}
+    </div>
+    ${children ? `<div class="tree-children">${children}</div>` : ''}
+  `;
+}
+
+function filterByStd(std) {
+  std = canonStd(std);
+  activeStds = new Set([std]);
+  document.querySelectorAll('.std-btn').forEach(b => b.classList.toggle('active', b.dataset.std === std));
+  isUnified = false;
+  document.getElementById('unified-btn').classList.remove('active');
+  switchView('graph', document.querySelectorAll('.view-tab')[1]);
+}
+
+// ── Standard toggles ──────────────────────────────────────────────────────────
+function toggleStd(std, btn) {
+  std = canonStd(std);
+  if (activeStds.has(std) && activeStds.size > 1) {
+    activeStds.delete(std); btn.classList.remove('active');
+  } else {
+    activeStds.add(std); btn.classList.add('active');
+  }
+  isUnified = activeStds.size === 4;
+  document.getElementById('unified-btn').classList.toggle('active', isUnified);
+  if (document.getElementById('view-graph').classList.contains('active')) {
+    graphLoaded = false; loadGraph();
+  }
+}
+
+function toggleUnified() {
+  isUnified = !isUnified;
+  document.getElementById('unified-btn').classList.toggle('active', isUnified);
+  if (isUnified) {
+    activeStds = new Set(STANDARDS);
+    document.querySelectorAll('.std-btn').forEach(b => b.classList.add('active'));
+  }
+  if (document.getElementById('view-graph').classList.contains('active')) {
+    graphLoaded = false; loadGraph();
+  }
+}
+
+// ── View switching ────────────────────────────────────────────────────────────
+function switchView(name, tab) {
+  document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  if (tab) tab.classList.add('active');
+  if (name === 'graph' && !graphLoaded) loadGraph();
+  if (name === 'dedup') loadDedup();
+}
+
+// ── Graph ─────────────────────────────────────────────────────────────────────
+async function loadGraph() {
+  graphLoaded = true;
+  document.getElementById('graph-loading').style.display = 'flex';
+  document.getElementById('graph-svg').style.display = 'none';
+  document.getElementById('graph-warn').style.display = 'none';
+  graphData = null;
+
+  try {
+    const stds = [...activeStds].join(',');
+    const r = await apiFetch('/graph?standards=' + encodeURIComponent(stds));
+    const d = await r.json();
+    graphData = d;
+    renderGraph(d);
+  } catch(e) {
+    document.getElementById('graph-loading').innerHTML = `<span style="color:var(--danger);">Graph load failed: ${e.message}</span>`;
+  }
+}
+
+function renderGraph(data) {
+  document.getElementById('graph-loading').style.display = 'none';
+  const svgEl = document.getElementById('graph-svg');
+  svgEl.style.display = 'block';
+
+  const container = document.getElementById('graph-container');
+  const W = container.clientWidth, H = container.clientHeight;
+
+  const nodes = data.nodes || [];
+  const edges = data.edges || [];
+
+  // Performance cap
+  const MAX_NODES = 600;
+  const visNodes  = nodes.length > MAX_NODES ? nodes.slice(0, MAX_NODES) : nodes;
+  const nodeIdSet = new Set(visNodes.map(n => n.id));
+  const visEdges  = edges.filter(e => nodeIdSet.has(e.source) && nodeIdSet.has(e.target)).slice(0, 2000);
+
+  const infoEl = document.getElementById('graph-info');
+  infoEl.textContent = `${visNodes.length} nodes · ${visEdges.length} edges`;
+  if (nodes.length > MAX_NODES) {
+    infoEl.textContent += ` (capped at ${MAX_NODES} of ${nodes.length})`;
+  }
+
+  // Warn if no edges
+  const warnEl = document.getElementById('graph-warn');
+  if (visEdges.length === 0 && visNodes.length > 0) {
+    warnEl.style.display = 'block';
+    warnEl.textContent = visNodes.length > 0
+      ? 'No crossmatch edges found — node tags may not match concept_links.json source_tag values. Check that sbrain_core.py has run and output/crossmatch/ exists.'
+      : 'No nodes found — check that output/S*_extracted.json files exist.';
+  }
+
+  // Clear previous
+  d3.select('#graph-svg').selectAll('*').remove();
+
+  const svg = d3.select('#graph-svg').attr('viewBox', `0 0 ${W} ${H}`);
+  const g   = svg.append('g');
+
+  // Zoom behavior
+  const zoom = d3.zoom().scaleExtent([0.03, 5])
+    .on('zoom', e => g.attr('transform', e.transform));
+  svgZoom = zoom;
+  svg.call(zoom);
+
+  // Arrow marker (subtle)
+  svg.append('defs').append('marker')
+    .attr('id', 'arr').attr('viewBox', '0 -5 10 10')
+    .attr('refX', 14).attr('refY', 0)
+    .attr('markerWidth', 4).attr('markerHeight', 4)
+    .attr('orient', 'auto')
+    .append('path').attr('d', 'M0,-5L10,0L0,5')
+    .attr('fill', 'rgba(255,255,255,0.15)');
+
+  // Build D3 node/link objects
+  const nodeMap = {};
+  const d3Nodes = visNodes.map(n => { const o = {...n}; nodeMap[n.id] = o; return o; });
+  const d3Links = visEdges.map(e => ({
+    ...e,
+    source: nodeMap[e.source] || e.source,
+    target: nodeMap[e.target] || e.target,
+  }));
+
+  // Force simulation — adjust strength based on count
+  const chargeStr = visNodes.length > 300 ? -60 : visNodes.length > 100 ? -100 : -150;
+  const linkDist  = visNodes.length > 300 ? 40  : 65;
+
+  const sim = d3.forceSimulation(d3Nodes)
+    .force('link', d3.forceLink(d3Links).id(n => n.id).distance(linkDist).strength(0.4))
+    .force('charge', d3.forceManyBody().strength(chargeStr))
+    .force('center', d3.forceCenter(W / 2, H / 2))
+    .force('collision', d3.forceCollide(8));
+
+  // Edges
+  const link = g.append('g').selectAll('line')
+    .data(d3Links).join('line')
+    .attr('class', 'd3-link')
+    .attr('stroke', d => {
+      const rt = d.relationship_type;
+      if (rt === 'equivalent') return 'rgba(99,102,241,0.3)';
+      if (rt === 'partial_equivalent') return 'rgba(34,197,94,0.2)';
+      return 'rgba(255,255,255,0.07)';
+    })
+    .attr('stroke-opacity', d => Math.max(0.1, Math.min(0.8, (d.score || 0))));
+
+  // Nodes
+  const node = g.append('g').selectAll('g')
+    .data(d3Nodes).join('g')
+    .attr('class', 'd3-node')
+    .attr('id', d => 'dn-' + CSS.escape(d.id))
+    .call(d3.drag()
+      .on('start', (ev, d) => { if (!ev.active) sim.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+      .on('drag',  (ev, d) => { d.fx = ev.x; d.fy = ev.y; })
+      .on('end',   (ev, d) => { if (!ev.active) sim.alphaTarget(0); d.fx = null; d.fy = null; })
+    )
+    .on('click', (ev, d) => { ev.stopPropagation(); selectNode(d); });
+
+  // Node radius based on source type
+  node.append('circle')
+    .attr('r', d => d.source === 'xsd_schema' ? 8 : d.source === 'entity' ? 6 : 5)
+    .attr('fill', d => d.color || '#888')
+    .attr('fill-opacity', 0.85)
+    .attr('stroke', d => d.color || '#888')
+    .attr('stroke-width', 0.5)
+    .attr('stroke-opacity', 0.4);
+
+  node.append('text')
+    .attr('dy', d => d.source === 'xsd_schema' ? 20 : 17)
+    .attr('text-anchor', 'middle')
+    .text(d => d.tag && d.tag.length > 16 ? d.tag.slice(0, 16) + '…' : (d.tag || ''));
+
+  // Deselect on background click
+  svg.on('click', () => { clearDetail(); deselectAll(); });
+
+  // Tick
+  sim.on('tick', () => {
+    link.attr('x1', d => d.source.x).attr('y1', d => d.source.y)
+        .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+    node.attr('transform', d => `translate(${d.x},${d.y})`);
+  });
+
+  // Stop sim after it settles for large graphs
+  if (visNodes.length > 400) {
+    setTimeout(() => sim.alphaTarget(0), 5000);
+  }
+}
+
+function deselectAll() {
+  d3.selectAll('.d3-node').classed('selected', false).classed('impacted', false);
+  d3.selectAll('.d3-link').classed('highlighted', false);
+}
+
+function selectNode(d) {
+  deselectAll();
+  const escaped = CSS.escape(d.id);
+  d3.select(`#dn-${escaped}`).classed('selected', true);
+  loadNodeDetail(d.id);
+}
+
+function highlightImpact(ids) {
+  const idSet = new Set(ids);
+  d3.selectAll('.d3-node').classed('impacted', n => idSet.has(n.id));
+}
+
+function zoomG(factor) {
+  if (svgZoom) d3.select('#graph-svg').transition().duration(200).call(svgZoom.scaleBy, factor);
+}
+function resetZoom() {
+  if (svgZoom) d3.select('#graph-svg').transition().duration(300).call(svgZoom.transform, d3.zoomIdentity);
+}
+
+// ── Node Detail ───────────────────────────────────────────────────────────────
+async function loadNodeDetail(nodeId) {
+  document.getElementById('node-detail').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const r = await apiFetch('/node/' + encodeURIComponent(nodeId));
+    const d = await r.json();
+    renderNodeDetail(d);
+  } catch(e) {
+    document.getElementById('node-detail').innerHTML = '<div class="empty-hint">Error loading node</div>';
+  }
+}
+
+function renderNodeDetail(d) {
+  const data   = d.data || {};
+  const color  = d.color || '#888';
+  const std    = d.standard || '';
+
+  const skipKeys = new Set(['tag_name','standard','source','source_file','_updated_at','children','data']);
+  const editAttrs = Object.entries(data).filter(([k]) => !skipKeys.has(k));
+
+  const sourceBadgeColor = {xsd_schema:'#6366F1', entity:'#22C55E', section:'#F97316'}[data.source] || '#888';
+
+  const linksHtml = (d.links || []).slice(0, 20).map(lnk => {
+    const isSrc   = lnk.source_std === std && lnk.source_tag === d.tag;
+    const otherStd = canonStd(isSrc ? lnk.target_std : lnk.source_std);
+    const otherTag = isSrc ? lnk.target_tag : lnk.source_tag;
+    const nid      = `${otherStd}::${otherTag}`;
+    return `<div class="link-chip" onclick="loadNodeDetail('${nid.replace(/'/g,"\\'")}');selectNodeById('${nid.replace(/'/g,"\\'")}')">
+      <span class="std-dot" style="background:${STD_COLORS[otherStd]||'#888'}"></span>
+      <span style="font-family:'Space Mono',monospace;font-size:9px;color:${STD_COLORS[otherStd]||'#888'}">${otherStd}</span>
+      <span style="font-size:10px">${otherTag}</span>
+      <span style="font-size:9px;color:var(--muted)">${lnk.relationship_type||''}</span>
+      <span class="link-score">${(lnk.score||0).toFixed(2)}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('node-detail').innerHTML = `
+    <div class="node-tag">${d.tag}</div>
+    <div class="node-std-badge" style="background:${color}20;color:${color};border:1px solid ${color}40;">
+      <span class="std-dot" style="background:${color}"></span>${std}
+    </div>
+    <span class="source-badge" style="background:${sourceBadgeColor}20;color:${sourceBadgeColor};border:1px solid ${sourceBadgeColor}30;">${data.source || 'unknown'}</span>
+    ${d.override_applied ? `<div style="font-size:10px;color:var(--accent);margin-bottom:8px;">✎ User override applied</div>` : ''}
+
+    <div class="attr-section">
+      <div class="attr-section-title">Attributes</div>
+      ${editAttrs.length ? editAttrs.map(([k,v]) => `
+        <div class="attr-row">
+          <div class="attr-key">${k}</div>
+          <input class="attr-edit" id="edit-${k.replace(/[^a-z0-9]/gi,'_')}" value="${String(v).replace(/"/g,'&quot;').slice(0,200)}" />
+        </div>`).join('') : '<div style="color:var(--muted);font-size:11px;">No editable attributes</div>'}
+    </div>
+
+    <button class="save-btn" onclick="saveEdits('${d.id.replace(/'/g,"\\'")}', ${JSON.stringify(editAttrs.map(([k])=>k))})">
+      Save Changes
+    </button>
+    <div class="impact-banner" id="impact-banner"></div>
+
+    ${d.links?.length ? `
+      <div class="attr-section" style="margin-top:14px;">
+        <div class="attr-section-title">Crossmatch Links (${d.links.length})</div>
+        ${linksHtml}
+      </div>` : '<div style="color:var(--muted);font-size:11px;margin-top:12px;">No crossmatch links found for this node</div>'}
+  `;
+}
+
+function selectNodeById(nid) {
+  if (!graphData) return;
+  const node = graphData.nodes?.find(n => n.id === nid);
+  if (node) {
+    try { d3.select('#dn-' + CSS.escape(nid)).classed('selected', true); } catch(e) {}
+  }
+}
+
+async function saveEdits(nodeId, keys) {
+  const updates = {};
+  keys.forEach(k => {
+    const el = document.getElementById('edit-' + k.replace(/[^a-z0-9]/gi,'_'));
+    if (el) updates[k] = el.value;
+  });
+  try {
+    const r = await apiFetch('/update-node', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({id: nodeId, updates}),
+    });
+    const result = await r.json();
+    toast('✓ Node updated');
+    if (result.impacted?.length) {
+      const banner = document.getElementById('impact-banner');
+      if (banner) { banner.style.display = 'block'; banner.textContent = `⚡ ${result.impacted.length} linked nodes affected`; }
+      highlightImpact(result.impacted);
+    }
+  } catch(e) { toast('⚠ Save failed: ' + e.message); }
+}
+
+function clearDetail() {
+  document.getElementById('node-detail').innerHTML = '<div class="empty-hint">Click a node in the graph<br>to view its details</div>';
+}
+
+// ── Search ────────────────────────────────────────────────────────────────────
+async function doSearch() {
+  const q = (document.getElementById('search-input').value || document.getElementById('global-search').value).trim();
+  if (!q) return;
+  document.getElementById('search-input').value = q;
+  document.getElementById('global-search').value = q;
+  switchView('search', document.querySelectorAll('.view-tab')[2]);
+
+  const el = document.getElementById('search-results');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const r = await apiFetch('/search?q=' + encodeURIComponent(q));
+    const d = await r.json();
+    if (!d.results?.length) {
+      el.innerHTML = '<div class="empty-hint">No results found for "' + q + '"</div>';
+      return;
+    }
+    el.innerHTML = d.results.map(res => {
+      const m   = typeof res.meta === 'object' ? res.meta : {};
+      const std = canonStd(m.standard || m.std || '');
+      const tag = m.tag || m.tag_name || m.name || '';
+      const nid = std && tag ? `${std}::${tag}` : '';
+      return `<div class="search-result" onclick="${nid ? `loadNodeDetail('${nid.replace(/'/g,"\\'")}')` : ''}">
+        <div class="search-result-tag">
+          ${std ? `<span style="color:${STD_COLORS[std]||'#888'}">${std} :: </span>` : ''}${tag || 'Result'}
+        </div>
+        <div style="font-size:10px;color:var(--muted);">score: ${(res.score||0).toFixed(3)} · ${m.type||''}</div>
+        <div class="search-result-text">${(res.text||'').slice(0,200)}</div>
+      </div>`;
+    }).join('');
+  } catch(e) { el.innerHTML = '<div class="empty-hint">Search error: ' + e.message + '</div>'; }
+}
+
+document.getElementById('global-search').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+
+// ── Deduplication ─────────────────────────────────────────────────────────────
+async function loadDedup() {
+  const threshold = document.getElementById('dedup-threshold').value / 100;
+  const el = document.getElementById('dedup-content');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const r = await apiFetch('/crossmatch-groups?min_score=' + threshold);
+    const d = await r.json();
+    const groups = d.groups || [];
+    document.getElementById('dedup-count').textContent = `${groups.length} groups`;
+    if (!groups.length) {
+      el.innerHTML = '<div class="empty-hint">No equivalent groups at this threshold</div>'; return;
+    }
+    el.innerHTML = groups.map((g, i) => {
+      const chips = g.members.map(m => {
+        const parts = m.split('::');
+        const std   = canonStd(parts[0] || '');
+        const tag   = parts.slice(1).join('::') || m;
+        return `<div class="dedup-chip">
+          <span class="std-dot" style="background:${STD_COLORS[std]||'#888'}"></span>
+          <span style="color:${STD_COLORS[std]||'#888'};font-family:'Space Mono',monospace;font-size:9px;">${std}</span>
+          <span>${tag}</span>
+        </div>`;
+      }).join('');
+      return `<div class="dedup-group">
+        <div class="dedup-group-header" onclick="toggleDedup(${i})">
+          <div class="dedup-group-id">${g.group_id}</div>
+          <div class="dedup-size-badge">${g.size}</div>
+          <span id="darr-${i}" style="color:var(--muted);font-size:11px;">▶</span>
+        </div>
+        <div class="dedup-members" id="dm-${i}">${chips}</div>
+      </div>`;
+    }).join('');
+  } catch(e) { el.innerHTML = '<div class="empty-hint">Error: ' + e.message + '</div>'; }
+}
+
+function toggleDedup(i) {
+  const el = document.getElementById('dm-' + i);
+  const arr = document.getElementById('darr-' + i);
+  el.classList.toggle('open');
+  arr.textContent = el.classList.contains('open') ? '▼' : '▶';
+}
+
+// ── Export ────────────────────────────────────────────────────────────────────
+async function doExport() {
+  const file     = document.getElementById('export-file').files[0];
+  const from_std = document.getElementById('export-from').value;  // already canonical
+  const to_std   = document.getElementById('export-to').value;
+
+  if (!file) { toast('Please select an XML file'); return; }
+  if (from_std === to_std) { toast('Source and target must be different'); return; }
+
+  const resultEl = document.getElementById('export-result');
+  resultEl.style.display = 'block';
+  resultEl.textContent = 'Translating…';
+
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('from_std', from_std);
+
+  try {
+    const r = await fetch(`${API}/export/${encodeURIComponent(to_std)}`, {method:'POST', body:fd});
+    if (!r.ok) { resultEl.textContent = 'Error: ' + await r.text(); return; }
+    const xml  = await r.text();
+    const blob = new Blob([xml], {type:'application/xml'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = `${from_std}_to_${to_std}.xml`; a.click();
+    resultEl.textContent = xml.slice(0, 1500) + (xml.length > 1500 ? '\n…(truncated)' : '');
+    toast('✓ Export complete — file downloading');
+  } catch(e) { resultEl.textContent = 'Error: ' + e.message; }
+}
+
+async function confirmMapping() {
+  const from_std = document.getElementById('map-from').value;
+  const to_std   = document.getElementById('map-to').value;
+  const orig     = document.getElementById('map-orig').value.trim();
+  const newTag   = document.getElementById('map-new').value.trim();
+  if (!orig || !newTag) { toast('Fill in both tag fields'); return; }
+
+  const fd = new FormData();
+  fd.append('from_std', from_std); fd.append('to_std', to_std);
+  fd.append('original_tag', orig); fd.append('new_tag', newTag);
+
+  try {
+    const r = await apiFetch('/confirm-mapping', {method:'POST', body:fd});
+    const d = await r.json();
+    toast('✓ ' + d.message);
+    document.getElementById('map-orig').value = '';
+    document.getElementById('map-new').value  = '';
+  } catch(e) { toast('⚠ ' + e.message); }
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>

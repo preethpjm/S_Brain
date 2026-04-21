@@ -1,6 +1,6 @@
 """
 S-Brain Core v4.4
-- S1000D, S2000M, S3000L, SX1000i all supported
+- S1000D, S2000M, S3000L, SX000i all supported
 - Semantic cross-matcher (sbrain_crossmatch.py) built after all PDFs processed
 - RAG index built once across all standards
 - No hardcoded field maps — everything flows through crossmatch
@@ -83,7 +83,7 @@ STANDARD_PROFILES = {
         "skip_title_patterns": [r"\.{5,}", r"^\[PREAMBLE\]", r"^\s*\d+\s*$"],
         "skip_rules_in": ["[preamble]", "copyright", "user agreement", "license"],
     },
-    "SX1000i": {
+    "SX000i": {
         "description": "Integrated Logistics Support Index Standard",
         "key_entities": [
             "ILS", "Integrated Logistics Support", "Supportability", "LORA",
@@ -654,7 +654,7 @@ class S3000LExtractor(BaseExtractor):
         return base
 
 
-class SX1000iExtractor(BaseExtractor):
+class SX000iExtractor(BaseExtractor):
     """Extractor for the ILS index standard — focuses on cross-references and index entries."""
 
     CROSSREF_PATTERN = re.compile(
@@ -702,7 +702,7 @@ EXTRACTOR_MAP = {
     "S1000D": S1000DExtractor,
     "S2000M": S2000MExtractor,
     "S3000L": S3000LExtractor,
-    "SX1000i": SX1000iExtractor,
+    "SX000i": SX000iExtractor,
 }
 
 
@@ -1009,7 +1009,7 @@ class AerospaceExtractorPipeline:
             "S1000D": "Inputs/S1000D",
             "S2000M": "Inputs/S2000M",
             "S3000L": "Inputs/S3000L",
-            # SX1000i XSD loaded if directory exists
+            # SX000i XSD loaded if directory exists
         }
         if xsd_dirs:
             if isinstance(xsd_dirs, str):
@@ -1019,10 +1019,10 @@ class AerospaceExtractorPipeline:
                     xsd_dirs = {}
             default_xsd.update(xsd_dirs)
 
-        # Auto-detect SX1000i inputs directory
-        sx_path = "Inputs/SX1000i"
-        if os.path.exists(sx_path) and "SX1000i" not in default_xsd:
-            default_xsd["SX1000i"] = sx_path
+        # Auto-detect SX000i inputs directory
+        sx_path = "Inputs/SX000i"
+        if os.path.exists(sx_path) and "SX000i" not in default_xsd:
+            default_xsd["SX000i"] = sx_path
 
         for std, path in default_xsd.items():
             if os.path.exists(path):
@@ -1032,16 +1032,16 @@ class AerospaceExtractorPipeline:
 
     def detect_standard(self, pdf_path: str) -> str:
         name = Path(pdf_path).name.upper()
-        # SX1000i check first (contains "SX1000")
-        for std in ["SX1000i", "S3000L", "S2000M", "S1000D"]:
-            std_key = std.upper().replace("SX1000I", "SX1000")
+        # SX000i check first (contains "SX1000")
+        for std in ["SX000i", "S3000L", "S2000M", "S1000D"]:
+            std_key = std.upper().replace("SX000i", "SX1000")
             if std_key in name or std.upper() in name:
                 return std
         try:
             doc = fitz.open(pdf_path)
             first = doc[0].get_text("text").upper()
             doc.close()
-            for std in ["SX1000i", "S3000L", "S2000M", "S1000D"]:
+            for std in ["SX000i", "S3000L", "S2000M", "S1000D"]:
                 if std.upper() in first:
                     return std
         except Exception:
@@ -1158,7 +1158,7 @@ class AerospaceExtractorPipeline:
             },
         )
 
-        # If the same standard appears more than once (e.g. SX1000i pdf detected as S1000D),
+        # If the same standard appears more than once (e.g. SX000i pdf detected as S1000D),
         # merge rather than overwrite.
         if standard in self.all_results:
             existing = self.all_results[standard]
@@ -1217,7 +1217,7 @@ class AerospaceExtractorPipeline:
             "S1000D": "Inputs/S1000D",
             "S2000M": "Inputs/S2000M",
             "S3000L": "Inputs/S3000L",
-            "SX1000i": "Inputs/SX1000i",
+            "SX000i": "Inputs/SX000i",
         }
         for std, path in candidate_dirs.items():
             if os.path.exists(path):
@@ -1229,15 +1229,15 @@ class AerospaceExtractorPipeline:
             if json_path.exists():
                 extracted_jsons[std] = str(json_path)
 
-        # SX1000i treated as boost source, not a translation endpoint
-        sx_dir = standard_dirs.pop("SX1000i", None)
+        # SX000i treated as boost source, not a translation endpoint
+        sx_dir = standard_dirs.pop("SX000i", None)
 
         try:
             matcher = SemanticCrossMatcher(output_dir=crossmatch_output)
             matcher.build(
                 standard_dirs=standard_dirs,
                 extracted_jsons=extracted_jsons,
-                sx1000i_dir=sx_dir,
+                SX000i_dir=sx_dir,
             )
             print(f"  Cross-matcher saved to: {crossmatch_output}")
         except Exception as e:
@@ -1359,7 +1359,7 @@ def main():
     parser = argparse.ArgumentParser(description="S-Brain v4.4")
     parser.add_argument("pdfs", nargs="+", help="PDF files to process")
     parser.add_argument("--standard", nargs="+", default=None,
-                        help="Standard per PDF (S1000D, S2000M, S3000L, SX1000i)")
+                        help="Standard per PDF (S1000D, S2000M, S3000L, SX000i)")
     parser.add_argument("--output", default="./output", help="Output directory")
     parser.add_argument("--xsd-dirs", type=str, default=None,
                         help='JSON dict: {"S1000D":"Inputs/S1000D", ...}')
