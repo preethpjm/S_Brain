@@ -901,8 +901,8 @@ class SBrainRAG:
         base_dir = Path(__file__).resolve().parent.parent
         local_model_path = base_dir / "models" / "all-MiniLM-L6-v2"
         print(f"[RAG] Using LOCAL model at: {local_model_path}")
-        self.model = SentenceTransformer(str(local_model_path))
-        #self.model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+        #self.model = SentenceTransformer(str(local_model_path))
+        self.model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
         self.index = None
         self.documents = []

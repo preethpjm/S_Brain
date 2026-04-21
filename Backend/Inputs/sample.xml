@@ -3,143 +3,128 @@
   <identAndStatusSection>
     <dmAddress>
       <dmIdent>
-        <dmCode modelIdentCode="SAMPLEBIKE"
-                systemDiffCode="AAA"
-                systemCode="10"
-                subSystemCode="1"
-                subSubCode="0"
+        <dmCode modelIdentCode="ADVBIKE"
+                systemDiffCode="BBB"
+                systemCode="20"
+                subSystemCode="2"
+                subSubCode="1"
                 assayCode="00"
                 modelicCode="00"
                 discode="00"
-                discodeVariant="A"
+                discodeVariant="B"
                 itemLocationCode="A"/>
-        <language languageIsoCode="en" countryIsoCode="GB"/>
-        <issueInfo issueNumber="001" inWork="00"/>
+        <language languageIsoCode="en" countryIsoCode="US"/>
+        <issueInfo issueNumber="002" inWork="01"/>
       </dmIdent>
       <dmAddressItems>
         <dmTitle>
-          <techName>Bicycle Frame Assembly</techName>
-          <infoName>Illustrated Parts List</infoName>
+          <techName>Advanced Bicycle System</techName>
+          <infoName>Illustrated Parts Catalogue</infoName>
         </dmTitle>
       </dmAddressItems>
     </dmAddress>
-    <dmStatus issueType="new" issueDate="2024-01-15">
-      <security securityClassification="01"/>
-      <responsiblePartnerCompany enterpriseCode="BK001"/>
-      <originator enterpriseCode="BK001"/>
-      <applicability>
-        <wholeModel/>
-      </applicability>
-      <qualityAssurance>
-        <unverified/>
-      </qualityAssurance>
-    </dmStatus>
   </identAndStatusSection>
 
-  <!-- IPL Content Section -->
   <content>
     <illustratedPartsCatalog>
 
-      <!-- Figure 1: Frame Assembly -->
-      <figure id="fig001">
-        <title>Frame Assembly — Main Components</title>
-        <graphic infoEntityIdent="ICN-SAMPLEBIKE-001"/>
+      <!-- FIGURE 1 -->
+      <figure id="fig100">
+        <title>Wheel Assembly</title>
       </figure>
 
-      <!-- Parts List for Figure 1 -->
       <partsList figureNumber="1">
 
-        <!-- Item 1: Frame -->
+        <!-- Item 1 -->
         <catalogSeqNumber item="1" indenture="1">
           <partSegment>
             <itemIdentData>
               <nomenclature>
-                <identName>FRAME, BICYCLE, ALUMINIUM</identName>
+                <identName>WHEEL ASSEMBLY</identName>
               </nomenclature>
-              <partNumberValue>BK-FRM-001-AL</partNumberValue>
-              <natoStockNumber natoSupplyClass="15" natoCodificationBureau="US">
-                <fullNatoStockNumber>1510-01-234-5678</fullNatoStockNumber>
-              </natoStockNumber>
-            </itemIdentData>
-            <quantityPerAssembly quantityUnitOfMeasure="EA">1</quantityPerAssembly>
-            <unitPrice currency="USD">450.00</unitPrice>
-            <manufacturerCodeValue>BK001</manufacturerCodeValue>
-          </partSegment>
-        </catalogSeqNumber>
-
-        <!-- Item 2: Handlebar -->
-        <catalogSeqNumber item="2" indenture="1">
-          <partSegment>
-            <itemIdentData>
-              <nomenclature>
-                <identName>HANDLEBAR ASSEMBLY</identName>
-              </nomenclature>
-              <partNumberValue>BK-HB-002-ST</partNumberValue>
-              <natoStockNumber natoSupplyClass="15" natoCodificationBureau="US">
-                <fullNatoStockNumber>1510-01-345-6789</fullNatoStockNumber>
-              </natoStockNumber>
-            </itemIdentData>
-            <quantityPerAssembly quantityUnitOfMeasure="EA">1</quantityPerAssembly>
-            <unitPrice currency="USD">85.00</unitPrice>
-            <manufacturerCodeValue>HB999</manufacturerCodeValue>
-          </partSegment>
-        </catalogSeqNumber>
-
-        <!-- Item 3: Brake Cable (attaches to Item 2) -->
-        <catalogSeqNumber item="3" indenture="2">
-          <partSegment>
-            <itemIdentData>
-              <nomenclature>
-                <identName>CABLE, BRAKE, 1.5MM</identName>
-              </nomenclature>
-              <partNumberValue>BK-CAB-003-BR</partNumberValue>
-              <natoStockNumber natoSupplyClass="15" natoCodificationBureau="UK">
-                <fullNatoStockNumber>1510-99-456-7890</fullNatoStockNumber>
-              </natoStockNumber>
+              <partNumberValue>WHL-100</partNumberValue>
             </itemIdentData>
             <quantityPerAssembly quantityUnitOfMeasure="EA">2</quantityPerAssembly>
-            <unitPrice currency="USD">12.50</unitPrice>
-            <manufacturerCodeValue>CBL555</manufacturerCodeValue>
+            <manufacturerCodeValue>WH001</manufacturerCodeValue>
           </partSegment>
         </catalogSeqNumber>
 
-        <!-- Item 4: Chain -->
-        <catalogSeqNumber item="4" indenture="1">
+        <!-- Item 2 (child of 1) -->
+        <catalogSeqNumber item="2" indenture="2">
           <partSegment>
             <itemIdentData>
               <nomenclature>
-                <identName>CHAIN, DRIVE, 11-SPEED</identName>
+                <identName>RIM, ALLOY</identName>
               </nomenclature>
-              <partNumberValue>BK-CHN-004-11S</partNumberValue>
-              <natoStockNumber natoSupplyClass="15" natoCodificationBureau="US">
-                <fullNatoStockNumber>1510-01-567-8901</fullNatoStockNumber>
+              <partNumberValue>RIM-200</partNumberValue>
+              <natoStockNumber natoSupplyClass="16" natoCodificationBureau="DE">
+                <fullNatoStockNumber>1610-12-111-2222</fullNatoStockNumber>
               </natoStockNumber>
             </itemIdentData>
             <quantityPerAssembly quantityUnitOfMeasure="EA">1</quantityPerAssembly>
-            <unitPrice currency="USD">65.00</unitPrice>
-            <manufacturerCodeValue>CHN222</manufacturerCodeValue>
-            <!-- Criticality flag -->
-            <criticalityCode>SC</criticalityCode>
+            <unitPrice currency="EUR">120.00</unitPrice>
+            <manufacturerCodeValue>RM200</manufacturerCodeValue>
           </partSegment>
         </catalogSeqNumber>
 
-        <!-- Item 5: Bolt kit (bulk item) -->
-        <catalogSeqNumber item="5" indenture="1">
+        <!-- Item 3 (child of 2, deeper nesting) -->
+        <catalogSeqNumber item="3" indenture="3">
           <partSegment>
             <itemIdentData>
               <nomenclature>
-                <identName>BOLT KIT, M5 STAINLESS</identName>
+                <identName>SPOKE SET</identName>
               </nomenclature>
-              <partNumberValue>BK-BLT-005-M5</partNumberValue>
+              <partNumberValue>SPK-300</partNumberValue>
             </itemIdentData>
-            <quantityPerAssembly quantityUnitOfMeasure="KT">1</quantityPerAssembly>
-            <unitPrice currency="USD">8.00</unitPrice>
-            <manufacturerCodeValue>BLT777</manufacturerCodeValue>
-            <sourceOfSupply>LOCAL</sourceOfSupply>
+            <quantityPerAssembly quantityUnitOfMeasure="SET">1</quantityPerAssembly>
+            <sourceOfSupply>OEM</sourceOfSupply>
           </partSegment>
         </catalogSeqNumber>
 
       </partsList>
+
+      <!-- FIGURE 2 -->
+      <figure id="fig200">
+        <title>Brake System</title>
+      </figure>
+
+      <partsList figureNumber="2">
+
+        <!-- Item 4 -->
+        <catalogSeqNumber item="4" indenture="1">
+          <partSegment>
+            <itemIdentData>
+              <nomenclature>
+                <identName>BRAKE CALIPER</identName>
+              </nomenclature>
+              <partNumberValue>BRC-400</partNumberValue>
+              <natoStockNumber natoSupplyClass="17" natoCodificationBureau="US">
+                <fullNatoStockNumber>1710-01-999-8888</fullNatoStockNumber>
+              </natoStockNumber>
+            </itemIdentData>
+            <quantityPerAssembly quantityUnitOfMeasure="EA">2</quantityPerAssembly>
+            <unitPrice currency="USD">75.00</unitPrice>
+            <manufacturerCodeValue>BRK400</manufacturerCodeValue>
+            <criticalityCode>CR</criticalityCode>
+          </partSegment>
+        </catalogSeqNumber>
+
+        <!-- Item 5 (missing NSN + price intentionally) -->
+        <catalogSeqNumber item="5" indenture="1">
+          <partSegment>
+            <itemIdentData>
+              <nomenclature>
+                <identName>BRAKE PAD SET</identName>
+              </nomenclature>
+              <partNumberValue>BPD-500</partNumberValue>
+            </itemIdentData>
+            <quantityPerAssembly quantityUnitOfMeasure="SET">1</quantityPerAssembly>
+            <manufacturerCodeValue>PAD500</manufacturerCodeValue>
+          </partSegment>
+        </catalogSeqNumber>
+
+      </partsList>
+
     </illustratedPartsCatalog>
   </content>
 </dmodule>

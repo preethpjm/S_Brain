@@ -67,8 +67,4 @@ class SBrainLearningMemory:
         return {
             "total_learned_mappings": len(self.memory),
             "last_updated": max((v.get("timestamp") for v in self.memory.values()), default="never")
-<<<<<<< HEAD
         }
-=======
-        }
->>>>>>> 383348f2231604a10dca9a6e763357ab05364792
